@@ -1,0 +1,34 @@
+{
+  "name": "igrp-framework-auth-frontend-monorepo",
+  "version": "1.0.0",
+  "description": "iGRP Framework Auth Frontend Monorepo",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "clean": "pnpm -r run clean",
+    "format": "pnpm -r run format",
+    "clean-all": "pnpm -r run clean-all",
+    "release:client": "pnpm --filter @igrp/platform-access-management-client-ts release"
+  },
+  "keywords": [
+    "igrp",
+    "framework",
+    "auth",
+    "frontend",
+    "monorepo"
+  ],
+  "author": "NOSi E.P.E.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/**",
+    "templates/**",
+    "apps/**"
+  ],
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.x.x"
+  }
+}
