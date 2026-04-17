@@ -144,4 +144,43 @@ describe('UserClient', () => {
             .rejects.toThrow('Failed to remove roles');
     });
 
+    describe('updateCurrentUser', () => {
+        it('should update the current authenticated user', async () => {
+            const mockResponse = { id: 1, name: 'Updated User', username: 'current', email: 'current@example.com', status: Status.ACTIVE };
+            mockPut.mockResolvedValue(mockResponse);
+
+            const userData = { id: 1, name: 'Updated User', username: 'current', email: 'current@example.com', status: Status.ACTIVE } as IGRPUserDTO;
+            const result = await client.updateCurrentUser(userData);
+
+            expect(mockPut).toHaveBeenCalledWith('/api/users/me', userData);
+            expect(result).toBe(mockResponse);
+        });
+    });
+
+    describe('validateInvitationEmail', () => {
+        it('should validate invitation email and send OTP', async () => {
+            const mockResponse = { success: true, message: 'OTP sent' };
+            mockPost.mockResolvedValue(mockResponse);
+
+            const request = { email: 'invite@example.com', token: 'abc123' };
+            const result = await client.validateInvitationEmail(request);
+
+            expect(mockPost).toHaveBeenCalledWith('/api/users/invite/validate-email', request);
+            expect(result).toBe(mockResponse);
+        });
+    });
+
+    describe('validateInvitationOtp', () => {
+        it('should validate invitation OTP code', async () => {
+            const mockResponse = { success: true, message: 'OTP valid' };
+            mockPost.mockResolvedValue(mockResponse);
+
+            const request = { email: 'invite@example.com', otp: '123456', token: 'abc123' };
+            const result = await client.validateInvitationOtp(request);
+
+            expect(mockPost).toHaveBeenCalledWith('/api/users/invite/validate-otp', request);
+            expect(result).toBe(mockResponse);
+        });
+    });
+
 });

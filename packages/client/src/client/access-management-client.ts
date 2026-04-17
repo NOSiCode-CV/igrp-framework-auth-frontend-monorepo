@@ -7,6 +7,9 @@ import { GlobalConfigurationClient } from "./global-configuration-client.js";
 import { FileClient } from "./file-client.js";
 import { AuthorizeClient } from "./authorize-client.js";
 import {M2MClient} from "./m2m-client";
+import { SessionClient } from "./session-client.js";
+import { AdminSessionClient } from "./admin-session-client.js";
+import { AuthAuditClient } from "./auth-audit-client.js";
 
 /**
  * Main Access Management API Client
@@ -21,6 +24,9 @@ export class AccessManagementClient {
     public readonly files: FileClient;
     public readonly authorize: AuthorizeClient;
     public readonly m2m: M2MClient;
+    public readonly sessions: SessionClient;
+    public readonly adminSessions: AdminSessionClient;
+    public readonly authAudit: AuthAuditClient;
 
     constructor(config: ApiClientConfig, m2mConfig?: M2MClientConfig) {
         this.applications = new ApplicationClient(config);
@@ -31,6 +37,9 @@ export class AccessManagementClient {
         this.files = new FileClient(config);
         this.authorize = new AuthorizeClient(config);
         this.m2m = new M2MClient({ ...config, headers: { ...config.headers, 'X-Machine-Service-ID': m2mConfig?.serviceId || '', 'X-Machine-Auth-Token': m2mConfig?.token || '' }});
+        this.sessions = new SessionClient(config);
+        this.adminSessions = new AdminSessionClient(config);
+        this.authAudit = new AuthAuditClient(config);
     }
 
     /**

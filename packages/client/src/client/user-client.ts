@@ -7,7 +7,7 @@ import {
     UserFilters,
     RoleDTO,
     RoleUserDTO, ApplicationDTO, MenuEntryDTO, UserInvitationResponseDTO, InviteUserDTO, DepartmentDTO, InvitationDTO,
-    PermissionDTO, RoleDepartmentDTO
+    PermissionDTO, RoleDepartmentDTO, OtpResponseDTO, ValidateInvitationEmailRequest, ValidateInvitationOtpRequest
 } from '@/types';
 
 export class UserClient extends BaseApiClient {
@@ -218,6 +218,27 @@ export class UserClient extends BaseApiClient {
      */
     async getUserPermissions(id: number): Promise<ApiResponse<PermissionDTO[]>> {
         return this.get<PermissionDTO[]>(`/api/users/${id}/permissions`);
+    }
+
+    /**
+     * Update the current authenticated user
+     */
+    async updateCurrentUser(user: IGRPUserDTO): Promise<ApiResponse<IGRPUserDTO>> {
+        return this.put<IGRPUserDTO>('/api/users/me', user);
+    }
+
+    /**
+     * Validate invitation email and send OTP
+     */
+    async validateInvitationEmail(request: ValidateInvitationEmailRequest): Promise<ApiResponse<OtpResponseDTO>> {
+        return this.post<OtpResponseDTO>('/api/users/invite/validate-email', request);
+    }
+
+    /**
+     * Validate invitation OTP code
+     */
+    async validateInvitationOtp(request: ValidateInvitationOtpRequest): Promise<ApiResponse<OtpResponseDTO>> {
+        return this.post<OtpResponseDTO>('/api/users/invite/validate-otp', request);
     }
 
     /**

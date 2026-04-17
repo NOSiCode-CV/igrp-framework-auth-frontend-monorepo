@@ -259,6 +259,18 @@ export interface RoleDepartmentDTO {
     departmentCode: string;
 }
 
+export interface RoleChildHierarchyDTO {
+    roleCode: string;
+    departmentCode: string;
+    children?: RoleChildHierarchyDTO[];
+}
+
+export interface RoleParentHierarchyDTO {
+    roleCode: string;
+    departmentCode: string;
+    parents?: RoleParentHierarchyDTO[];
+}
+
 // User Types
 export interface IGRPUserDTO {
     id: number;
@@ -390,6 +402,22 @@ export interface M2MDepartmentQueryOptions {
     includeChildrenDepartments?: boolean;
 }
 
+// OTP Types
+export interface OtpResponseDTO {
+    token: string;
+    message: string;
+}
+
+export interface ValidateInvitationEmailRequest {
+    token: string;
+    email: string;
+}
+
+export interface ValidateInvitationOtpRequest {
+    token: string;
+    otpCode: string;
+}
+
 // API Client Configuration
 export interface ApiClientConfig {
     baseUrl: string;
@@ -400,4 +428,100 @@ export interface ApiClientConfig {
 export interface M2MClientConfig {
     serviceId: string,
     token: string
+}
+
+// Session Enums
+export enum SessionStatus {
+    ACTIVE = 'ACTIVE',
+    CLOSED = 'CLOSED',
+    EXPIRED = 'EXPIRED',
+    REVOKED = 'REVOKED'
+}
+
+// Session Types
+export interface SessionResponseDTO {
+    sessionId: string;
+    status: SessionStatus;
+    startedAt?: string;
+    lastSeenAt?: string;
+    expiresAt?: string;
+    endedAt?: string;
+    closedReason?: string;
+    closedBy?: string;
+    clientIp?: string;
+    deviceId?: string;
+    userProfile?: IGRPUserDTO;
+    currentActiveRole?: RoleDepartmentDTO;
+    roles?: RoleDepartmentDTO[];
+    departments?: CodeDescriptionDTO[];
+}
+
+export interface SessionInitRequestDTO {
+    clientIp?: string;
+    deviceId?: string;
+    userAgent?: string;
+}
+
+export interface SessionRefreshRequestDTO {
+    extensionSeconds?: number;
+}
+
+export interface SessionKillRequestDTO {
+    reason: string;
+    killedBy?: string;
+}
+
+export interface SessionStatisticsDTO {
+    activeSessions: number;
+    expiredSessions: number;
+    closedSessions: number;
+    revokedSessions: number;
+}
+
+export interface SessionFilters {
+    status?: SessionStatus;
+    page?: number;
+    size?: number;
+}
+
+export interface SessionsByRoleFilters {
+    departmentCode?: string;
+    status?: SessionStatus;
+    page?: number;
+    size?: number;
+}
+
+// Paginated Response
+export interface PageResponse<T> {
+    content: T[];
+    totalElements: number;
+    totalPages: number;
+    size: number;
+    number: number;
+    first: boolean;
+    last: boolean;
+    empty: boolean;
+}
+
+// Security Audit Types
+export interface SecurityAuditLogDTO {
+    id: number;
+    userId?: string;
+    username?: string;
+    sessionId?: string;
+    ipAddress?: string;
+    userAgent?: string;
+    correlationId?: string;
+    requestPath?: string;
+    decisionReason?: string;
+    eventType?: string;
+    category?: string;
+    contextData?: string;
+    timestamp?: string;
+}
+
+export interface AuditLogFilters {
+    page?: number;
+    size?: number;
+    sort?: string;
 }

@@ -7,6 +7,9 @@ export { UserClient } from './client/user-client.js';
 export { FileClient } from './client/file-client.js';
 export { AuthorizeClient } from './client/authorize-client.js'
 export { M2MClient } from './client/m2m-client.js';
+export { SessionClient } from './client/session-client.js';
+export { AdminSessionClient } from './client/admin-session-client.js';
+export { AuthAuditClient } from './client/auth-audit-client.js';
 export { BaseApiClient, ApiClientError } from './client/base-client.js';
 
 // Type exports
@@ -57,11 +60,24 @@ export type {
     M2MUserQueryOptions,
     M2MRoleQueryOptions,
     M2MDepartmentQueryOptions,
+    // Session types
+    SessionResponseDTO,
+    SessionInitRequestDTO,
+    SessionRefreshRequestDTO,
+    SessionKillRequestDTO,
+    SessionStatisticsDTO,
+    SessionFilters,
+    SessionsByRoleFilters,
+    PageResponse,
+    // Audit types
+    SecurityAuditLogDTO,
+    AuditLogFilters,
     // Enums
     Status,
     MenuType,
     ApplicationType,
     DepartmentStatus,
     GlobalConfigurationType,
-    ResourceType
+    ResourceType,
+    SessionStatus
 } from './types/index.js';

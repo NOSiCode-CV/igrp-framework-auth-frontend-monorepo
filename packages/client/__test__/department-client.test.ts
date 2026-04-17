@@ -167,4 +167,158 @@ describe('DepartmentClient', () => {
         expect(result).toBe(mockResponse)
     })
 
+    describe('getDepartmentApplicationsFiltered', () => {
+        it('should get department applications with filter', async () => {
+            const mockResponse = [{ id: 1, code: 'APP1', name: 'App 1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getDepartmentApplicationsFiltered('DEPT1', 'APP1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/applications', { applicationCode: 'APP1' });
+            expect(result).toBe(mockResponse);
+        });
+
+        it('should get department applications without filter', async () => {
+            const mockResponse = [{ id: 1, code: 'APP1', name: 'App 1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getDepartmentApplicationsFiltered('DEPT1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/applications', undefined);
+            expect(result).toBe(mockResponse);
+        });
+    });
+
+    describe('getDepartmentMenusFiltered', () => {
+        it('should get department menus with filter', async () => {
+            const mockResponse = [{ id: 1, code: 'MENU1', name: 'Menu 1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getDepartmentMenusFiltered('DEPT1', 'APP1', 'MENU1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/applications/APP1/menus', { menuCode: 'MENU1' });
+            expect(result).toBe(mockResponse);
+        });
+
+        it('should get department menus without filter', async () => {
+            const mockResponse = [{ id: 1, code: 'MENU1', name: 'Menu 1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getDepartmentMenusFiltered('DEPT1', 'APP1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/applications/APP1/menus', undefined);
+            expect(result).toBe(mockResponse);
+        });
+    });
+
+    describe('getDepartmentResourcesFiltered', () => {
+        it('should get department resources with filter', async () => {
+            const mockResponse = [{ id: 1, name: 'RES1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getDepartmentResourcesFiltered('DEPT1', 'RES1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/resources', { resourceName: 'RES1' });
+            expect(result).toBe(mockResponse);
+        });
+
+        it('should get department resources without filter', async () => {
+            const mockResponse = [{ id: 1, name: 'RES1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getDepartmentResourcesFiltered('DEPT1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/resources', undefined);
+            expect(result).toBe(mockResponse);
+        });
+    });
+
+    describe('getDepartmentPermissionsFiltered', () => {
+        it('should get department permissions with filter', async () => {
+            const mockResponse = [{ id: 1, name: 'PERM1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getDepartmentPermissionsFiltered('DEPT1', 'PERM1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/permissions', { permissionName: 'PERM1' });
+            expect(result).toBe(mockResponse);
+        });
+
+        it('should get department permissions without filter', async () => {
+            const mockResponse = [{ id: 1, name: 'PERM1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getDepartmentPermissionsFiltered('DEPT1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/permissions', undefined);
+            expect(result).toBe(mockResponse);
+        });
+    });
+
+    describe('getAvailablePermissionsFiltered', () => {
+        it('should get available permissions with resource filter', async () => {
+            const mockResponse = [{ id: 1, name: 'PERM1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getAvailablePermissionsFiltered('DEPT1', 'RES1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/permissions/available', { resourceName: 'RES1' });
+            expect(result).toBe(mockResponse);
+        });
+
+        it('should get available permissions without resource filter', async () => {
+            const mockResponse = [{ id: 1, name: 'PERM1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getAvailablePermissionsFiltered('DEPT1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/permissions/available', undefined);
+            expect(result).toBe(mockResponse);
+        });
+    });
+
+    describe('getRoleChildrenHierarchy', () => {
+        it('should get role children hierarchy with level', async () => {
+            const mockResponse = { roleCode: 'ROLE1', children: [] };
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getRoleChildrenHierarchy('DEPT1', 'ROLE1', 2);
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/roles/ROLE1/children', { level: 2 });
+            expect(result).toBe(mockResponse);
+        });
+
+        it('should get role children hierarchy without level', async () => {
+            const mockResponse = { roleCode: 'ROLE1', children: [] };
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getRoleChildrenHierarchy('DEPT1', 'ROLE1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/roles/ROLE1/children', undefined);
+            expect(result).toBe(mockResponse);
+        });
+    });
+
+    describe('getRoleParentsHierarchy', () => {
+        it('should get role parents hierarchy with level', async () => {
+            const mockResponse = { roleCode: 'ROLE1', parents: [] };
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getRoleParentsHierarchy('DEPT1', 'ROLE1', 3);
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/roles/ROLE1/parents', { level: 3 });
+            expect(result).toBe(mockResponse);
+        });
+
+        it('should get role parents hierarchy without level', async () => {
+            const mockResponse = { roleCode: 'ROLE1', parents: [] };
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getRoleParentsHierarchy('DEPT1', 'ROLE1');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/roles/ROLE1/parents', undefined);
+            expect(result).toBe(mockResponse);
+        });
+    });
+
 });

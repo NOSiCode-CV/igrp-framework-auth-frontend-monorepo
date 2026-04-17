@@ -11,7 +11,9 @@ import {
     MenuEntryDTO,
     ResourceDTO,
     PermissionDTO,
-    RoleDepartmentDTO
+    RoleDepartmentDTO,
+    RoleChildHierarchyDTO,
+    RoleParentHierarchyDTO
 } from '@/types';
 
 export class DepartmentClient extends BaseApiClient {
@@ -217,5 +219,61 @@ export class DepartmentClient extends BaseApiClient {
      */
     async getAvailablePermissionsForRole(departmentCode: string, roleCode: string): Promise<ApiResponse<PermissionDTO[]>> {
         return this.get<PermissionDTO[]>(`/api/departments/${departmentCode}/roles/${roleCode}/permissions/available`);
+    }
+
+    /**
+     * Get department's applications with optional filter
+     */
+    async getDepartmentApplicationsFiltered(departmentCode: string, applicationCode?: string): Promise<ApiResponse<ApplicationDTO[]>> {
+        const params = applicationCode ? { applicationCode } : undefined;
+        return this.get<ApplicationDTO[]>(`/api/departments/${departmentCode}/applications`, params);
+    }
+
+    /**
+     * Get department's menus with optional filter
+     */
+    async getDepartmentMenusFiltered(departmentCode: string, applicationCode: string, menuCode?: string): Promise<ApiResponse<MenuEntryDTO[]>> {
+        const params = menuCode ? { menuCode } : undefined;
+        return this.get<MenuEntryDTO[]>(`/api/departments/${departmentCode}/applications/${applicationCode}/menus`, params);
+    }
+
+    /**
+     * Get department's resources with optional filter
+     */
+    async getDepartmentResourcesFiltered(departmentCode: string, resourceName?: string): Promise<ApiResponse<ResourceDTO[]>> {
+        const params = resourceName ? { resourceName } : undefined;
+        return this.get<ResourceDTO[]>(`/api/departments/${departmentCode}/resources`, params);
+    }
+
+    /**
+     * Get department's permissions with optional filter
+     */
+    async getDepartmentPermissionsFiltered(departmentCode: string, permissionName?: string): Promise<ApiResponse<PermissionDTO[]>> {
+        const params = permissionName ? { permissionName } : undefined;
+        return this.get<PermissionDTO[]>(`/api/departments/${departmentCode}/permissions`, params);
+    }
+
+    /**
+     * Get available permissions for a department with optional resource filter
+     */
+    async getAvailablePermissionsFiltered(departmentCode: string, resourceName?: string): Promise<ApiResponse<PermissionDTO[]>> {
+        const params = resourceName ? { resourceName } : undefined;
+        return this.get<PermissionDTO[]>(`/api/departments/${departmentCode}/permissions/available`, params);
+    }
+
+    /**
+     * Get role children hierarchy
+     */
+    async getRoleChildrenHierarchy(departmentCode: string, roleCode: string, level?: number): Promise<ApiResponse<RoleChildHierarchyDTO>> {
+        const params = level ? { level } : undefined;
+        return this.get<RoleChildHierarchyDTO>(`/api/departments/${departmentCode}/roles/${roleCode}/children`, params);
+    }
+
+    /**
+     * Get role parents hierarchy
+     */
+    async getRoleParentsHierarchy(departmentCode: string, roleCode: string, level?: number): Promise<ApiResponse<RoleParentHierarchyDTO>> {
+        const params = level ? { level } : undefined;
+        return this.get<RoleParentHierarchyDTO>(`/api/departments/${departmentCode}/roles/${roleCode}/parents`, params);
     }
 }
