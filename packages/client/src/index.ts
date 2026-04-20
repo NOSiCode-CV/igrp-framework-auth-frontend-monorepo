@@ -43,6 +43,7 @@ export type {
     RoleUserDTO,
     InviteUserDTO,
     UserInvitationResponseDTO,
+    AddRolesToUserRequestDTO,
     // Department types
     DepartmentDTO,
     CreateDepartmentRequest,

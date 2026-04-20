@@ -49,10 +49,20 @@ export class M2MClient extends BaseApiClient {
     }
 
     /**
-     * Sync application's menus
+     * Sync application's menus.
+     *
+     * @param applicationCode the target application code
+     * @param menus the menu entries to sync
+     * @param syncRoles when `false`, role associations are NOT synchronized (existing
+     *                  role bindings on each menu are preserved untouched). Defaults to `true`.
      */
-    async syncApplicationMenus(applicationCode: string, menus: MenuEntryDTO[]): Promise<ApiResponse<string>> {
-        return this.post<string>(`/api/m2m/sync/applications/${applicationCode}/menus`, menus);
+    async syncApplicationMenus(
+        applicationCode: string,
+        menus: MenuEntryDTO[],
+        syncRoles?: boolean,
+    ): Promise<ApiResponse<string>> {
+        const params = syncRoles !== undefined ? { syncRoles: String(syncRoles) } : undefined;
+        return this.post<string>(`/api/m2m/sync/applications/${applicationCode}/menus`, menus, params);
     }
 
     /**

@@ -7,7 +7,8 @@ import {
     UserFilters,
     RoleDTO,
     RoleUserDTO, ApplicationDTO, MenuEntryDTO, UserInvitationResponseDTO, InviteUserDTO, DepartmentDTO, InvitationDTO,
-    PermissionDTO, RoleDepartmentDTO, OtpResponseDTO, ValidateInvitationEmailRequest, ValidateInvitationOtpRequest
+    PermissionDTO, RoleDepartmentDTO, OtpResponseDTO, ValidateInvitationEmailRequest, ValidateInvitationOtpRequest,
+    AddRolesToUserRequestDTO
 } from '@/types';
 
 export class UserClient extends BaseApiClient {
@@ -65,8 +66,26 @@ export class UserClient extends BaseApiClient {
         return this.get<RoleDTO[]>(`/api/users/${id}/roles`);
     }
 
-    async addRolesToUser(id: number, departmentCode: string, roleCodes: string[]): Promise<ApiResponse<RoleDTO>> {
-        return this.post<RoleDTO>(`/api/users/${id}/departments/${departmentCode}/roles`, roleCodes);
+    /**
+     * Assign roles to a user within a department.
+     *
+     * Accepts either:
+     *   - an array of role codes (existing call-site compatibility), or
+     *   - an {@link AddRolesToUserRequestDTO} with `roles` and an optional `expiresAt`
+     *     for temporary profile assignments.
+     *
+     * In both cases the request is sent as the new {@link AddRolesToUserRequestDTO}
+     * body expected by the API.
+     */
+    async addRolesToUser(
+        id: number,
+        departmentCode: string,
+        rolesOrRequest: string[] | AddRolesToUserRequestDTO,
+    ): Promise<ApiResponse<RoleDTO>> {
+        const body: AddRolesToUserRequestDTO = Array.isArray(rolesOrRequest)
+            ? { roles: rolesOrRequest }
+            : rolesOrRequest;
+        return this.post<RoleDTO>(`/api/users/${id}/departments/${departmentCode}/roles`, body);
     }
 
     async removeRolesFromUser(id: number, departmentCode: string, roleCodes: string[]): Promise<ApiResponse<RoleDTO>> {

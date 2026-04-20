@@ -183,4 +183,29 @@ describe('UserClient', () => {
         });
     });
 
+    describe('addRolesToUser (AddRolesToUserRequestDTO)', () => {
+        it('should wrap a string[] of role codes into {roles} body', async () => {
+            mockPost.mockResolvedValue({ id: 1 });
+
+            await client.addRolesToUser(7, 'HR', ['admin', 'editor']);
+
+            expect(mockPost).toHaveBeenCalledWith(
+                '/api/users/7/departments/HR/roles',
+                { roles: ['admin', 'editor'] },
+            );
+        });
+
+        it('should pass through an AddRolesToUserRequestDTO with expiresAt (temporary role)', async () => {
+            mockPost.mockResolvedValue({ id: 1 });
+
+            const request = { roles: ['viewer'], expiresAt: '2027-01-01T00:00:00' };
+            await client.addRolesToUser(7, 'HR', request);
+
+            expect(mockPost).toHaveBeenCalledWith(
+                '/api/users/7/departments/HR/roles',
+                request,
+            );
+        });
+    });
+
 });

@@ -418,6 +418,17 @@ export interface ValidateInvitationOtpRequest {
     otpCode: string;
 }
 
+/**
+ * Request body for POST /api/users/{id}/departments/{departmentCode}/roles.
+ * Role codes to assign, with an optional temporary expiration timestamp.
+ */
+export interface AddRolesToUserRequestDTO {
+    /** List of role codes to assign */
+    roles: string[];
+    /** When set, role assignments expire at this ISO-8601 datetime (temporary role) */
+    expiresAt?: string;
+}
+
 // API Client Configuration
 export interface ApiClientConfig {
     baseUrl: string;
