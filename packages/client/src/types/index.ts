@@ -402,6 +402,15 @@ export interface M2MDepartmentQueryOptions {
     includeChildrenDepartments?: boolean;
 }
 
+/** Query options for POST /api/m2m/sync/applications/{code}/menus */
+export interface SyncApplicationMenusOptions {
+    /**
+     * When false, role associations on each menu are NOT synchronized (existing
+     * role bindings are preserved untouched). Defaults to true on the server.
+     */
+    syncRoles?: boolean;
+}
+
 // OTP Types
 export interface OtpResponseDTO {
     token: string;

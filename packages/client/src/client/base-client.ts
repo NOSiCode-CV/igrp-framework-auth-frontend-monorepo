@@ -1,5 +1,6 @@
 import {ApiClientConfig, ApiResponse, UploadFileOptions, UserFilters,
-    M2MDepartmentQueryOptions, M2MRoleQueryOptions, M2MUserQueryOptions
+    M2MDepartmentQueryOptions, M2MRoleQueryOptions, M2MUserQueryOptions,
+    SyncApplicationMenusOptions
 } from '@/types';
 
 export class BaseApiClient {
@@ -99,7 +100,7 @@ export class BaseApiClient {
     protected async post<T>(
         endpoint: string,
         body?: any,
-        params?: { params: UserFilters | UploadFileOptions | M2MDepartmentQueryOptions | M2MRoleQueryOptions | M2MUserQueryOptions | undefined,
+        params?: { params: UserFilters | UploadFileOptions | M2MDepartmentQueryOptions | M2MRoleQueryOptions | M2MUserQueryOptions | SyncApplicationMenusOptions | undefined,
             headers?: Record<string, string> }
     ): Promise<ApiResponse<T>> {
         // Build query string from params.params, not the whole params object

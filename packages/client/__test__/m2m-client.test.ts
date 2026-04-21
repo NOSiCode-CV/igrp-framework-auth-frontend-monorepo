@@ -52,7 +52,7 @@ describe('M2MClient', () => {
             expect(mockPost).toHaveBeenCalledWith(
                 '/api/m2m/sync/applications/APP1/menus',
                 menus,
-                { syncRoles: 'false' },
+                { params: { syncRoles: false } },
             );
         });
 
@@ -64,7 +64,7 @@ describe('M2MClient', () => {
             expect(mockPost).toHaveBeenCalledWith(
                 '/api/m2m/sync/applications/APP1/menus',
                 menus,
-                { syncRoles: 'true' },
+                { params: { syncRoles: true } },
             );
         });
     });

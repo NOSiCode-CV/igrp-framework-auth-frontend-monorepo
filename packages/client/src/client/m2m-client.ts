@@ -61,8 +61,8 @@ export class M2MClient extends BaseApiClient {
         menus: MenuEntryDTO[],
         syncRoles?: boolean,
     ): Promise<ApiResponse<string>> {
-        const params = syncRoles !== undefined ? { syncRoles: String(syncRoles) } : undefined;
-        return this.post<string>(`/api/m2m/sync/applications/${applicationCode}/menus`, menus, params);
+        const options = syncRoles !== undefined ? { params: { syncRoles } } : undefined;
+        return this.post<string>(`/api/m2m/sync/applications/${applicationCode}/menus`, menus, options);
     }
 
     /**
