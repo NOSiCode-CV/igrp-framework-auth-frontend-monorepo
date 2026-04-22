@@ -27,8 +27,6 @@ export class BaseApiClient {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
-        console.log("[DEBUG] Request OPTIONS: ", options);
-
         // For FormData, exclude Content-Type from defaultHeaders
         const isFormDataBody = options.body instanceof FormData;
         const defaultHeadersToUse = isFormDataBody
@@ -48,22 +46,9 @@ export class BaseApiClient {
             signal: controller.signal
         };
 
-        console.log("[DEBUG] Request URL: ", url);
-        // Better logging for FormData - serialize it for debugging
-        const logOptions = {
-            ...requestOptions,
-            body: isFormDataBody && requestOptions.body instanceof FormData
-                ? this.serializeFormData(requestOptions.body)
-                : requestOptions.body
-        };
-        console.log("[DEBUG] Request Options: ", JSON.stringify(logOptions, null, 2));
-
-        //console.log("[iGRP Access Management Client] Calling API: \n", "URL: " + url, "\nRequest: " + JSON.stringify(requestOptions, null, 2));
-
         try {
             const response = await fetch(url, requestOptions);
 
-            console.log("[DEBUG] Response: " + JSON.stringify(response));
             clearTimeout(timeoutId);
 
             if (!response.ok) {
@@ -126,10 +111,6 @@ export class BaseApiClient {
                 }
             });
         }
-
-        console.log("[DEBUG] isFormData: " + isFormData)
-        console.log("[DEBUG] body: " + body)
-        console.log("[DEBUG] headers: " + JSON.stringify(headers))
 
         return this.request<T>(url, {
             method: 'POST',

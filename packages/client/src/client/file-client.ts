@@ -16,9 +16,6 @@ export class FileClient extends BaseApiClient {
         const formData = new FormData();
         formData.append('file', file, file instanceof File ? file.name : undefined);
 
-        console.log("[DEBUG] file: " + file)
-        console.log("[DEBUG] folder: " + options.folder)
-
         // Don't pass contentType - let browser set Content-Type automatically with boundary
         return this.post<string>('/api/files/public', formData, {
             params: { folder: options.folder }
@@ -38,9 +35,6 @@ export class FileClient extends BaseApiClient {
     ): Promise<ApiResponse<string>> {
         const formData = new FormData();
         formData.append('file', file, file instanceof File ? file.name : undefined);
-
-        console.log("[DEBUG] file: " + file)
-        console.log("[DEBUG] folder: " + options.folder)
 
         // Don't pass contentType - let browser set Content-Type automatically with boundary
         return this.post<string>('/api/files/private', formData, {

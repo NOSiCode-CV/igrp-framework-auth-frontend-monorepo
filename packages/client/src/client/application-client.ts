@@ -121,6 +121,13 @@ export class ApplicationClient extends BaseApiClient {
     }
 
     /**
+     * Get applications accessible by a specific user
+     */
+    async getApplicationsByUser(uid: string): Promise<ApiResponse<ApplicationDTO[]>> {
+        return this.get<ApplicationDTO[]>(`/api/applications/by-user/${uid}`);
+    }
+
+    /**
      * Link resource to another application
      */
     async linkResourceToApplication(
