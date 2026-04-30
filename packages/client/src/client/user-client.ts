@@ -8,7 +8,9 @@ import {
     RoleDTO,
     RoleUserDTO, ApplicationDTO, MenuEntryDTO, UserInvitationResponseDTO, InviteUserDTO, DepartmentDTO, InvitationDTO,
     PermissionDTO, RoleDepartmentDTO, OtpResponseDTO, ValidateInvitationEmailRequest, ValidateInvitationOtpRequest,
-    AddRolesToUserRequestDTO
+    AddRolesToUserRequestDTO,
+    UserMetadataDTO,
+    UpdateUserMetadataRequestDTO
 } from '@/types';
 
 export class UserClient extends BaseApiClient {
@@ -265,6 +267,25 @@ export class UserClient extends BaseApiClient {
      */
     async createUser(user: CreateUserRequest): Promise<ApiResponse<IGRPUserDTO>> {
         return this.post<IGRPUserDTO>('/api/users', user);
+    }
+
+    /**
+     * Get the free-form metadata JSON associated with the user. Used by the
+     * OAuth2 authorization server for token enrichment.
+     */
+    async getUserMetadata(id: number): Promise<ApiResponse<UserMetadataDTO>> {
+        return this.get<UserMetadataDTO>(`/api/users/${id}/metadata`);
+    }
+
+    /**
+     * Replace the user's metadata JSON. The whole map is replaced — caller is
+     * responsible for merging if a partial update is desired.
+     */
+    async updateUserMetadata(
+        id: number,
+        request: UpdateUserMetadataRequestDTO,
+    ): Promise<ApiResponse<UserMetadataDTO>> {
+        return this.put<UserMetadataDTO>(`/api/users/${id}/metadata`, request);
     }
 
 }

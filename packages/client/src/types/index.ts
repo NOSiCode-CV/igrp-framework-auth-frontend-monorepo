@@ -545,3 +545,65 @@ export interface AuditLogFilters {
     size?: number;
     sort?: string;
 }
+
+// =============================================================================
+// OAuth2 Authorization Server — client management
+// =============================================================================
+
+/** Authorization grants supported by the iGRP authorization server. */
+export type OAuthGrantType =
+    | 'authorization_code'
+    | 'refresh_token'
+    | 'client_credentials'
+    | 'device_code';
+
+export interface OAuthClientDTO {
+    id: string;
+    clientId: string;
+    /**
+     * Returned only on creation so the operator can hand the secret off.
+     * Subsequent reads do NOT include it.
+     */
+    clientSecret?: string;
+    clientName?: string;
+    description?: string;
+    active: boolean;
+    /** Owning application id (1 application → N clients). */
+    applicationId?: number;
+    applicationCode?: string;
+    accessTokenTtl: number;
+    refreshTokenTtl: number;
+    authorizationCodeTtl: number;
+    scopes: string[];
+    redirectUris: string[];
+    grantTypes: OAuthGrantType[] | string[];
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface OAuthClientRequestDTO {
+    clientId: string;
+    clientName: string;
+    description?: string;
+    active?: boolean;
+    applicationId?: number;
+    accessTokenTtl?: number;
+    refreshTokenTtl?: number;
+    authorizationCodeTtl?: number;
+    scopes: string[];
+    redirectUris?: string[];
+    grantTypes: OAuthGrantType[] | string[];
+}
+
+// =============================================================================
+// User metadata (free-form JSONB on t_user, surfaced via OAuth identity APIs)
+// =============================================================================
+
+export interface UserMetadataDTO {
+    userId: number;
+    metadata: Record<string, unknown>;
+}
+
+export interface UpdateUserMetadataRequestDTO {
+    metadata: Record<string, unknown>;
+}
