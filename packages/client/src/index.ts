@@ -10,6 +10,7 @@ export { M2MClient } from './client/m2m-client.js';
 export { SessionClient } from './client/session-client.js';
 export { AdminSessionClient } from './client/admin-session-client.js';
 export { AuthAuditClient } from './client/auth-audit-client.js';
+export { OAuthClient } from './client/oauth-client.js';
 export { BaseApiClient, ApiClientError } from './client/base-client.js';
 
 // Type exports
@@ -73,6 +74,13 @@ export type {
     // Audit types
     SecurityAuditLogDTO,
     AuditLogFilters,
+    // OAuth client types
+    OAuthClientDTO,
+    OAuthClientRequestDTO,
+    OAuthGrantType,
+    // User metadata types
+    UserMetadataDTO,
+    UpdateUserMetadataRequestDTO,
     // Enums
     Status,
     MenuType,
