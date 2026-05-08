@@ -18,7 +18,7 @@ export class UserClient extends BaseApiClient {
      * Get users with optional filters
      */
     async getUsers(filters?: UserFilters): Promise<ApiResponse<IGRPUserDTO[]>> {
-        return this.get<IGRPUserDTO[]>("/api/users", { params: filters });
+        return this.get<IGRPUserDTO[]>("/api/users", filters);
     }
 
     async getUser(id: number): Promise<ApiResponse<IGRPUserDTO>> {
@@ -61,7 +61,7 @@ export class UserClient extends BaseApiClient {
      * Get user invitations with optional filters
      */
     async getUserInvitations(email?: string): Promise<ApiResponse<InvitationDTO[]>> {
-        return this.get<InvitationDTO[]>("/api/users/invite", { params: { email } });
+        return this.get<InvitationDTO[]>("/api/users/invite", { email });
     }
 
     async getUserRoles(id: number): Promise<ApiResponse<RoleDTO[]>> {
@@ -133,14 +133,14 @@ export class UserClient extends BaseApiClient {
      * Get the current authenticated user's applications
      */
      async getCurrentUserApplications(applicationName?: string): Promise<ApiResponse<ApplicationDTO[]>> {
-        return this.get<ApplicationDTO[]>(`/api/users/me/applications`, { params: { applicationName } });
+        return this.get<ApplicationDTO[]>(`/api/users/me/applications`, { applicationName });
     }
 
     /**
      * Get the current authenticated user's recent applications
      */
      async getCurrentUserRecentApplications(applicationName?: string, max?: string): Promise<ApiResponse<ApplicationDTO[]>> {
-        return this.get<ApplicationDTO[]>(`/api/users/me/applications/recent`, { params: { applicationName, max } });
+        return this.get<ApplicationDTO[]>(`/api/users/me/applications/recent`, { applicationName, max });
     }
 
     /**
@@ -154,7 +154,7 @@ export class UserClient extends BaseApiClient {
      * Get the current authenticated user's favorite applications
      */
      async getCurrentUserFavoriteApplications(applicationName?: string): Promise<ApiResponse<ApplicationDTO[]>> {
-        return this.get<ApplicationDTO[]>(`/api/users/me/applications/favorites`, { params: { applicationName } });
+        return this.get<ApplicationDTO[]>(`/api/users/me/applications/favorites`, { applicationName });
     }
 
     /**
