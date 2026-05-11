@@ -147,6 +147,66 @@ describe('BaseApiClient', () => {
       );
     });
 
+    it('should not append a trailing "?" when all params are undefined', async () => {
+      const mockResponse = {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: vi.fn().mockResolvedValue('{"data":"ok"}'),
+        json: vi.fn().mockResolvedValue({ data: 'ok' }),
+        headers: { get: vi.fn().mockReturnValue('application/json') }
+      };
+      // @ts-ignore
+      (global.fetch as vi.Mock).mockResolvedValue(mockResponse);
+
+      await (client as any).get('/api/users/me/applications', { applicationName: undefined });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+          'https://api.example.com/api/users/me/applications',
+          expect.objectContaining({ method: 'GET' })
+      );
+    });
+
+    it('should drop only the undefined params and keep defined ones', async () => {
+      const mockResponse = {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: vi.fn().mockResolvedValue('{"data":"ok"}'),
+        json: vi.fn().mockResolvedValue({ data: 'ok' }),
+        headers: { get: vi.fn().mockReturnValue('application/json') }
+      };
+      // @ts-ignore
+      (global.fetch as vi.Mock).mockResolvedValue(mockResponse);
+
+      await (client as any).get('/api/users/me/applications/recent', { applicationName: undefined, max: '5' });
+
+      expect(global.fetch).toHaveBeenCalledWith(
+          'https://api.example.com/api/users/me/applications/recent?max=5',
+          expect.objectContaining({ method: 'GET' })
+      );
+    });
+
+    it('should not append "?" when params object is empty', async () => {
+      const mockResponse = {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: vi.fn().mockResolvedValue('{"data":"ok"}'),
+        json: vi.fn().mockResolvedValue({ data: 'ok' }),
+        headers: { get: vi.fn().mockReturnValue('application/json') }
+      };
+      // @ts-ignore
+      (global.fetch as vi.Mock).mockResolvedValue(mockResponse);
+
+      await (client as any).get('/test', {});
+
+      expect(global.fetch).toHaveBeenCalledWith(
+          'https://api.example.com/test',
+          expect.objectContaining({ method: 'GET' })
+      );
+    });
+
     it('should make POST requests with JSON body', async () => {
       const mockResponse = {
         ok: true,

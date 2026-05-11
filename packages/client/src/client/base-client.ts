@@ -78,8 +78,7 @@ export class BaseApiClient {
     }
 
     protected async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
-        const url = params ? `${endpoint}?${this.buildQueryString(params)}` : endpoint;
-        return this.request<T>(url, {method: 'GET'});
+        return this.request<T>(this.appendQueryString(endpoint, params), {method: 'GET'});
     }
 
     protected async post<T>(
@@ -89,9 +88,7 @@ export class BaseApiClient {
             headers?: Record<string, string> }
     ): Promise<ApiResponse<T>> {
         // Build query string from params.params, not the whole params object
-        const url = params?.params 
-            ? `${endpoint}?${this.buildQueryString(params.params)}` 
-            : endpoint;
+        const url = this.appendQueryString(endpoint, params?.params);
 
         const isFormData = (typeof FormData !== 'undefined') && body instanceof FormData;
 
@@ -150,9 +147,7 @@ export class BaseApiClient {
             headers?: Record<string, string> }
     ): Promise<ApiResponse<T>> {
         // Build query string from params.params, not the whole params object
-        const url = params?.params 
-            ? `${endpoint}?${this.buildQueryString(params.params)}` 
-            : endpoint;
+        const url = this.appendQueryString(endpoint, params?.params);
 
         const isFormData = (typeof FormData !== 'undefined') && body instanceof FormData;
 
@@ -187,9 +182,7 @@ export class BaseApiClient {
             headers?: Record<string, string> }
     ): Promise<ApiResponse<T>> {
         // Build query string from params.params, not the whole params object
-        const url = params?.params 
-            ? `${endpoint}?${this.buildQueryString(params.params)}` 
-            : endpoint;
+        const url = this.appendQueryString(endpoint, params?.params);
 
         const isFormData = (typeof FormData !== 'undefined') && body instanceof FormData;
 
@@ -310,6 +303,18 @@ export class BaseApiClient {
         });
 
         return searchParams.toString();
+    }
+
+    /**
+     * Append a query string to {@code endpoint} only when at least one
+     * defined param is present. Avoids producing degenerate URLs with a
+     * trailing {@code ?} (which Node's WHATWG fetch refuses to parse) when
+     * the caller passes an object whose values are all undefined/null.
+     */
+    private appendQueryString(endpoint: string, params?: Record<string, any>): string {
+        if (!params) return endpoint;
+        const qs = this.buildQueryString(params);
+        return qs ? `${endpoint}?${qs}` : endpoint;
     }
 
 }
