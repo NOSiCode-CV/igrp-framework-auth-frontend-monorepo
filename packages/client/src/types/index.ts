@@ -273,7 +273,7 @@ export interface RoleParentHierarchyDTO {
 
 // User Types
 export interface IGRPUserDTO {
-    id: number;
+    id: string;
     name: string;
     username?: string;
     email: string;
@@ -600,7 +600,7 @@ export interface OAuthClientRequestDTO {
 // =============================================================================
 
 export interface UserMetadataDTO {
-    userId: number;
+    userId: string;
     metadata: Record<string, unknown>;
 }
 

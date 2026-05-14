@@ -21,15 +21,15 @@ export class UserClient extends BaseApiClient {
         return this.get<IGRPUserDTO[]>("/api/users", filters);
     }
 
-    async getUser(id: number): Promise<ApiResponse<IGRPUserDTO>> {
+    async getUser(id: string): Promise<ApiResponse<IGRPUserDTO>> {
         return this.get<IGRPUserDTO>(`/api/users/${id}`);
     }
 
-    async updateUser(id: number, user: IGRPUserDTO): Promise<ApiResponse<IGRPUserDTO>> {
+    async updateUser(id: string, user: IGRPUserDTO): Promise<ApiResponse<IGRPUserDTO>> {
         return this.put<IGRPUserDTO>(`/api/users/${id}`, user);
     }
 
-    async updateUserStatus(id: number, value: string): Promise<ApiResponse<IGRPUserDTO>> {
+    async updateUserStatus(id: string, value: string): Promise<ApiResponse<IGRPUserDTO>> {
         return this.put<IGRPUserDTO>(`/api/users/${id}/status?value=${value}`);
     }
 
@@ -64,7 +64,7 @@ export class UserClient extends BaseApiClient {
         return this.get<InvitationDTO[]>("/api/users/invite", { email });
     }
 
-    async getUserRoles(id: number): Promise<ApiResponse<RoleDTO[]>> {
+    async getUserRoles(id: string): Promise<ApiResponse<RoleDTO[]>> {
         return this.get<RoleDTO[]>(`/api/users/${id}/roles`);
     }
 
@@ -80,7 +80,7 @@ export class UserClient extends BaseApiClient {
      * body expected by the API.
      */
     async addRolesToUser(
-        id: number,
+        id: string,
         departmentCode: string,
         rolesOrRequest: string[] | AddRolesToUserRequestDTO,
     ): Promise<ApiResponse<RoleDTO>> {
@@ -90,7 +90,7 @@ export class UserClient extends BaseApiClient {
         return this.post<RoleDTO>(`/api/users/${id}/departments/${departmentCode}/roles`, body);
     }
 
-    async removeRolesFromUser(id: number, departmentCode: string, roleCodes: string[]): Promise<ApiResponse<RoleDTO>> {
+    async removeRolesFromUser(id: string, departmentCode: string, roleCodes: string[]): Promise<ApiResponse<RoleDTO>> {
         return this.delete<RoleDTO>(`/api/users/${id}/departments/${departmentCode}/roles`, roleCodes);
     }
 
@@ -111,7 +111,7 @@ export class UserClient extends BaseApiClient {
     /**
      * Get a user's departments
      */
-     async getUserDepartments(id: number): Promise<ApiResponse<DepartmentDTO[]>> {
+     async getUserDepartments(id: string): Promise<ApiResponse<DepartmentDTO[]>> {
         return this.get<DepartmentDTO[]>(`/api/users/${id}/departments`);
     }
 
@@ -125,7 +125,7 @@ export class UserClient extends BaseApiClient {
      /**
      * Get a user's department roles
      */
-     async getUserDepartmentRoles(id: number, departmentCode: string): Promise<ApiResponse<RoleUserDTO[]>> {
+     async getUserDepartmentRoles(id: string, departmentCode: string): Promise<ApiResponse<RoleUserDTO[]>> {
         return this.get<RoleUserDTO[]>(`/api/users/${id}/departments/${departmentCode}/roles`);
     }
 
@@ -174,7 +174,7 @@ export class UserClient extends BaseApiClient {
     /**
      * Get a user's applications
      */
-     async getUserApplications(id: number): Promise<ApiResponse<ApplicationDTO[]>> {
+     async getUserApplications(id: string): Promise<ApiResponse<ApplicationDTO[]>> {
         return this.get<ApplicationDTO[]>(`/api/users/${id}/applications`);
     }
 
@@ -188,7 +188,7 @@ export class UserClient extends BaseApiClient {
      /**
      * Get a user's application menus
      */
-     async getUserApplicationMenus(id: number, applicationCode: string): Promise<ApiResponse<MenuEntryDTO[]>> {
+     async getUserApplicationMenus(id: string, applicationCode: string): Promise<ApiResponse<MenuEntryDTO[]>> {
         return this.get<MenuEntryDTO[]>(`/api/users/${id}/applications/${applicationCode}/menus`);
     }
 
@@ -209,7 +209,7 @@ export class UserClient extends BaseApiClient {
     /**
      * Get a user's active role
      */
-    async getUserActiveRole(id: number): Promise<ApiResponse<RoleDepartmentDTO>> {
+    async getUserActiveRole(id: string): Promise<ApiResponse<RoleDepartmentDTO>> {
         return this.get<RoleDepartmentDTO>(`/api/users/${id}/roles/active`);
     }
 
@@ -223,7 +223,7 @@ export class UserClient extends BaseApiClient {
     /**
      * Set a user's active role
      */
-    async setUserActiveRole(id: number, body: RoleDepartmentDTO): Promise<ApiResponse<RoleDepartmentDTO>> {
+    async setUserActiveRole(id: string, body: RoleDepartmentDTO): Promise<ApiResponse<RoleDepartmentDTO>> {
         return this.post<RoleDepartmentDTO>(`/api/users/${id}/roles/active`, body);
     }
 
@@ -237,7 +237,7 @@ export class UserClient extends BaseApiClient {
     /**
      * Get a user's permissions
      */
-    async getUserPermissions(id: number): Promise<ApiResponse<PermissionDTO[]>> {
+    async getUserPermissions(id: string): Promise<ApiResponse<PermissionDTO[]>> {
         return this.get<PermissionDTO[]>(`/api/users/${id}/permissions`);
     }
 
@@ -273,7 +273,7 @@ export class UserClient extends BaseApiClient {
      * Get the free-form metadata JSON associated with the user. Used by the
      * OAuth2 authorization server for token enrichment.
      */
-    async getUserMetadata(id: number): Promise<ApiResponse<UserMetadataDTO>> {
+    async getUserMetadata(id: string): Promise<ApiResponse<UserMetadataDTO>> {
         return this.get<UserMetadataDTO>(`/api/users/${id}/metadata`);
     }
 
@@ -282,7 +282,7 @@ export class UserClient extends BaseApiClient {
      * responsible for merging if a partial update is desired.
      */
     async updateUserMetadata(
-        id: number,
+        id: string,
         request: UpdateUserMetadataRequestDTO,
     ): Promise<ApiResponse<UserMetadataDTO>> {
         return this.put<UserMetadataDTO>(`/api/users/${id}/metadata`, request);

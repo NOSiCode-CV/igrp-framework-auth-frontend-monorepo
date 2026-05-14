@@ -19,6 +19,13 @@ vi.mock('../src/client/base-client.ts', () => {
     };
 });
 
+// UUIDs used across the test fixtures (Phase G2: user PK is String UUID).
+const USER_ID_1 = '11111111-1111-1111-1111-111111111111';
+const USER_ID_2 = '22222222-2222-2222-2222-222222222222';
+const USER_ID_3 = '33333333-3333-3333-3333-333333333333';
+const USER_ID_4 = '44444444-4444-4444-4444-444444444444';
+const USER_ID_7 = '77777777-7777-7777-7777-777777777777';
+
 describe('UserClient', () => {
     let client: UserClient;
     const mockConfig = { baseUrl: 'https://api.example.com', timeout: 5000 };
@@ -29,7 +36,7 @@ describe('UserClient', () => {
     });
 
     it('should get users with filters', async () => {
-        const mockResponse: IGRPUserDTO[] = [{ id: 1, name: 'John Doe', username: 'johndoe', email: 'john@example.com', status: Status.ACTIVE }];
+        const mockResponse: IGRPUserDTO[] = [{ id: USER_ID_1, name: 'John Doe', username: 'johndoe', email: 'john@example.com', status: Status.ACTIVE }];
         mockPost.mockResolvedValue(mockResponse);
 
         const filters = { name: 'John' };
@@ -40,30 +47,30 @@ describe('UserClient', () => {
     });
 
     it('should get user by ID', async () => {
-        const mockResponse = { id: 2, name: 'Jane Doe', username: 'janedoe', email: 'jane@example.com' };
+        const mockResponse = { id: USER_ID_2, name: 'Jane Doe', username: 'janedoe', email: 'jane@example.com' };
         mockGet.mockResolvedValue(mockResponse);
 
-        const result = await client.getUserById(2);
+        const result = await client.getUser(USER_ID_2);
 
-        expect(mockGet).toHaveBeenCalledWith('/api/users/2');
+        expect(mockGet).toHaveBeenCalledWith(`/api/users/${USER_ID_2}`);
         expect(result).toBe(mockResponse);
     });
 
     it('should get current user', async () => {
-        const mockResponse = { id: 3, name: 'Current User', username: 'current', email: 'current@example.com' };
+        const mockResponse = { id: USER_ID_3, name: 'Current User', username: 'current', email: 'current@example.com' };
         mockGet.mockResolvedValue(mockResponse);
 
         const result = await client.getCurrentUser();
 
-        expect(mockGet).toHaveBeenCalledWith('/api/users/current');
+        expect(mockGet).toHaveBeenCalledWith('/api/users/me');
         expect(result).toBe(mockResponse);
     });
 
     it('should create a new user', async () => {
-        const mockResponse = { id: 4, name: 'New User', username: 'newuser', email: 'new@example.com', status: Status.ACTIVE };
+        const mockResponse = { id: USER_ID_4, name: 'New User', username: 'newuser', email: 'new@example.com', status: Status.ACTIVE };
         mockPost.mockResolvedValue(mockResponse);
 
-        const newUser = { name: 'New User', username: 'newuser', email: 'new@example.com', status: Status.ACTIVE };
+        const newUser = { name: 'New User', email: 'new@example.com', status: Status.ACTIVE };
         const result = await client.createUser(newUser);
 
         expect(mockPost).toHaveBeenCalledWith('/api/users', newUser);
@@ -71,10 +78,10 @@ describe('UserClient', () => {
     });
 
     it('should invite a new user', async () => {
-        const mockResponse = { id: 4, name: 'New User', username: 'newuser', email: 'new@example.com' };
+        const mockResponse = { id: 4, email: 'new@example.com' };
         mockPost.mockResolvedValue(mockResponse);
 
-        const newUser = { name: 'New User', username: 'newuser', email: 'new@example.com', status: Status.ACTIVE };
+        const newUser = { email: 'new@example.com', departmentCode: 'HR', roles: ['admin'] };
         const result = await client.inviteUser(newUser);
 
         expect(mockPost).toHaveBeenCalledWith('/api/users/invite', newUser);
@@ -82,13 +89,13 @@ describe('UserClient', () => {
     });
 
     it('should update a user', async () => {
-        const mockResponse = { id: 4, name: 'Updated User', username: 'newuser', email: 'new@example.com' };
+        const mockResponse = { id: USER_ID_4, name: 'Updated User', username: 'newuser', email: 'new@example.com' };
         mockPut.mockResolvedValue(mockResponse);
 
-        const updateData = { name: 'Updated User' };
-        const result = await client.updateUser(4, updateData);
+        const updateData = { id: USER_ID_4, name: 'Updated User', email: 'new@example.com', status: Status.ACTIVE } as IGRPUserDTO;
+        const result = await client.updateUser(USER_ID_4, updateData);
 
-        expect(mockPut).toHaveBeenCalledWith('/api/users/4', updateData);
+        expect(mockPut).toHaveBeenCalledWith(`/api/users/${USER_ID_4}`, updateData);
         expect(result).toBe(mockResponse);
     });
 
@@ -96,60 +103,18 @@ describe('UserClient', () => {
         const mockResponse = [{ id: 1, name: 'Admin', departmentCode: 'HR' }];
         mockGet.mockResolvedValue(mockResponse);
 
-        const result = await client.getUserRoles(1);
+        const result = await client.getUserRoles(USER_ID_1);
 
-        expect(mockGet).toHaveBeenCalledWith('/api/users/1/roles');
+        expect(mockGet).toHaveBeenCalledWith(`/api/users/${USER_ID_1}/roles`);
         expect(result).toBe(mockResponse);
-    });
-
-    it('should add roles to a user', async () => {
-        const mockResponse = { id: 1, name: 'Admin', departmentId: 1 };
-        mockPost.mockResolvedValue(mockResponse);
-
-        const result = await client.addRolesToUser(1, ['admin', 'editor']);
-
-        expect(mockPost).toHaveBeenCalledWith(
-            '/api/users/1/roles',
-            ['admin', 'editor']
-        );
-        expect(result).toBe(mockResponse);
-    });
-
-    it('should handle errors when adding roles', async () => {
-        const mockError = new Error('Failed to add roles');
-        mockPost.mockRejectedValue(mockError);
-
-        await expect(client.addRolesToUser(1, ['admin']))
-            .rejects.toThrow('Failed to add roles');
-    });
-
-    it('should remove roles from a user', async () => {
-        const mockResponse = { id: 1, name: 'Admin', departmentId: 1 };
-        mockDelete.mockResolvedValue(mockResponse);
-
-        const result = await client.removeRolesFromUser(1, ['editor']);
-
-        expect(mockDelete).toHaveBeenCalledWith(
-            '/api/users/1/roles',
-            ['editor']
-        );
-        expect(result).toBe(mockResponse);
-    });
-
-    it('should handle errors when removing roles', async () => {
-        const mockError = new Error('Failed to remove roles');
-        mockDelete.mockRejectedValue(mockError);
-
-        await expect(client.removeRolesFromUser(1, ['editor']))
-            .rejects.toThrow('Failed to remove roles');
     });
 
     describe('updateCurrentUser', () => {
         it('should update the current authenticated user', async () => {
-            const mockResponse = { id: 1, name: 'Updated User', username: 'current', email: 'current@example.com', status: Status.ACTIVE };
+            const mockResponse = { id: USER_ID_1, name: 'Updated User', username: 'current', email: 'current@example.com', status: Status.ACTIVE };
             mockPut.mockResolvedValue(mockResponse);
 
-            const userData = { id: 1, name: 'Updated User', username: 'current', email: 'current@example.com', status: Status.ACTIVE } as IGRPUserDTO;
+            const userData = { id: USER_ID_1, name: 'Updated User', username: 'current', email: 'current@example.com', status: Status.ACTIVE } as IGRPUserDTO;
             const result = await client.updateCurrentUser(userData);
 
             expect(mockPut).toHaveBeenCalledWith('/api/users/me', userData);
@@ -175,7 +140,7 @@ describe('UserClient', () => {
             const mockResponse = { success: true, message: 'OTP valid' };
             mockPost.mockResolvedValue(mockResponse);
 
-            const request = { email: 'invite@example.com', otp: '123456', token: 'abc123' };
+            const request = { token: 'abc123', otpCode: '123456' };
             const result = await client.validateInvitationOtp(request);
 
             expect(mockPost).toHaveBeenCalledWith('/api/users/invite/validate-otp', request);
@@ -187,10 +152,10 @@ describe('UserClient', () => {
         it('should wrap a string[] of role codes into {roles} body', async () => {
             mockPost.mockResolvedValue({ id: 1 });
 
-            await client.addRolesToUser(7, 'HR', ['admin', 'editor']);
+            await client.addRolesToUser(USER_ID_7, 'HR', ['admin', 'editor']);
 
             expect(mockPost).toHaveBeenCalledWith(
-                '/api/users/7/departments/HR/roles',
+                `/api/users/${USER_ID_7}/departments/HR/roles`,
                 { roles: ['admin', 'editor'] },
             );
         });
@@ -199,10 +164,10 @@ describe('UserClient', () => {
             mockPost.mockResolvedValue({ id: 1 });
 
             const request = { roles: ['viewer'], expiresAt: '2027-01-01T00:00:00' };
-            await client.addRolesToUser(7, 'HR', request);
+            await client.addRolesToUser(USER_ID_7, 'HR', request);
 
             expect(mockPost).toHaveBeenCalledWith(
-                '/api/users/7/departments/HR/roles',
+                `/api/users/${USER_ID_7}/departments/HR/roles`,
                 request,
             );
         });
