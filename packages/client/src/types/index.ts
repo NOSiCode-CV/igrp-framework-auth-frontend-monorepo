@@ -445,9 +445,29 @@ export interface ApiClientConfig {
     headers?: Record<string, string>;
 }
 
+/**
+ * Configuration for the {@link M2MClient}. Authentication uses the OAuth2
+ * {@code client_credentials} grant against the Access Management API's
+ * authorization server — the client library fetches and caches the
+ * Bearer token transparently via {@link ClientCredentialsTokenProvider}.
+ *
+ * - `clientId` / `clientSecret` — required for the token-fetch.
+ * - `serviceId` — optional informational header (`X-Machine-Service-ID`)
+ *   sent with every M2M call so the API can log which service made the
+ *   call.
+ * - `scope` — optional; only set when the OAuth2 client registration
+ *   constrains scope.
+ * - `token` — legacy static M2M token. Retained for callers that haven't
+ *   migrated to client credentials. When both shapes are provided, the
+ *   client_credentials path wins.
+ */
 export interface M2MClientConfig {
-    serviceId: string,
-    token: string
+    clientId?: string;
+    clientSecret?: string;
+    scope?: string;
+    serviceId?: string;
+    /** @deprecated use clientId + clientSecret. */
+    token?: string;
 }
 
 // Session Enums

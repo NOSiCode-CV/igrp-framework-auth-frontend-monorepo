@@ -36,7 +36,10 @@ export class AccessManagementClient {
         this.globalConfiguration = new GlobalConfigurationClient(config);
         this.files = new FileClient(config);
         this.authorize = new AuthorizeClient(config);
-        this.m2m = new M2MClient({ ...config, headers: { ...config.headers, 'X-Machine-Service-ID': m2mConfig?.serviceId || '', 'X-Machine-Auth-Token': m2mConfig?.token || '' }});
+        // M2MClient handles auth internally via OAuth2 client_credentials
+        // (or the legacy static token when clientId/clientSecret aren't
+        // supplied) — no need to bake auth headers into the base config.
+        this.m2m = new M2MClient(config, m2mConfig);
         this.sessions = new SessionClient(config);
         this.adminSessions = new AdminSessionClient(config);
         this.authAudit = new AuthAuditClient(config);
