@@ -1,5 +1,7 @@
 import { BaseApiClient } from './base-client.js';
+import { ClientCredentialsTokenProvider } from '../auth/client-credentials-token-provider.js';
 import {
+    ApiClientConfig,
     ApiResponse,
     IGRPUserDTO,
     RoleDTO,
@@ -7,14 +9,62 @@ import {
     PermissionDTO,
     ApplicationDTO,
     ResourceDTO,
+    M2MClientConfig,
     M2MUserQueryOptions,
     M2MRoleQueryOptions,
-    M2MDepartmentQueryOptions, MenuEntryDTO
+    M2MDepartmentQueryOptions,
+    MenuEntryDTO,
 } from '@/types';
 
+/**
+ * Wrapper for the Access Management API's machine-to-machine endpoints
+ * (`/api/m2m/**`).
+ *
+ * Authentication uses the OAuth2 `client_credentials` grant against the
+ * API's authorization server (`POST {baseUrl}/oauth2/token`). Configure
+ * the credentials once on the constructor and the library fetches +
+ * caches the Bearer token for every M2M call:
+ *
+ * ```ts
+ * const m2m = new M2MClient(
+ *   { baseUrl: 'https://api.example.com/igrp-access-management' },
+ *   { clientId: 'my-service', clientSecret: process.env.MY_SERVICE_SECRET! }
+ * );
+ *
+ * await m2m.syncResources({ name: 'my-service', type: 'API', description: '...' });
+ * await m2m.syncPermissions(permissions);
+ * ```
+ *
+ * Legacy `M2MClientConfig.token` is honoured when no clientId/clientSecret
+ * pair is set, so existing callers keep working — but new deployments
+ * should migrate to client_credentials.
+ */
 export class M2MClient extends BaseApiClient {
+
+    private static readonly SERVICE_HEADER = 'X-Machine-Service-ID';
+
+    private readonly serviceId?: string;
+    private readonly tokenProvider?: ClientCredentialsTokenProvider;
+    /** @deprecated retained for legacy static-token callers. */
+    private readonly legacyToken?: string;
+
+    constructor(config: ApiClientConfig, m2mConfig?: M2MClientConfig) {
+        super(config);
+        this.serviceId = m2mConfig?.serviceId;
+        if (m2mConfig?.clientId && m2mConfig?.clientSecret) {
+            this.tokenProvider = new ClientCredentialsTokenProvider(
+                config.baseUrl,
+                m2mConfig.clientId,
+                m2mConfig.clientSecret,
+                m2mConfig.scope,
+            );
+        } else if (m2mConfig?.token) {
+            this.legacyToken = m2mConfig.token;
+        }
+    }
+
     /**
-     * Get users for business codes with optional filters
+     * Get users for business codes with optional filters.
      */
     async getUsersForBusiness(
         identifiers: string[],
@@ -23,50 +73,67 @@ export class M2MClient extends BaseApiClient {
         return this.post<IGRPUserDTO[]>(
             '/api/m2m/users',
             identifiers,
-            { params: options }
+            { params: options, headers: await this.buildAuthHeaders() }
         );
     }
 
     /**
-     * Sync resources
+     * Sync resources (idempotent upsert).
      */
     async syncResources(resource: ResourceDTO): Promise<ApiResponse<string>> {
-        return this.post<string>('/api/m2m/sync/resources', resource);
+        return this.post<string>(
+            '/api/m2m/sync/resources',
+            resource,
+            { params: undefined, headers: await this.buildAuthHeaders() }
+        );
     }
 
     /**
-     * Sync permissions
+     * Sync permissions (idempotent upsert).
      */
     async syncPermissions(permissions: PermissionDTO[]): Promise<ApiResponse<string>> {
-        return this.post<string>('/api/m2m/sync/permissions', permissions);
+        return this.post<string>(
+            '/api/m2m/sync/permissions',
+            permissions,
+            { params: undefined, headers: await this.buildAuthHeaders() }
+        );
     }
 
     /**
-     * Sync applications
+     * Sync applications (idempotent upsert).
      */
     async syncApplications(application: ApplicationDTO): Promise<ApiResponse<string>> {
-        return this.post<string>('/api/m2m/sync/applications', application);
+        return this.post<string>(
+            '/api/m2m/sync/applications',
+            application,
+            { params: undefined, headers: await this.buildAuthHeaders() }
+        );
     }
 
     /**
-     * Sync application's menus.
+     * Sync an application's menus.
      *
-     * @param applicationCode the target application code
-     * @param menus the menu entries to sync
-     * @param syncRoles when `false`, role associations are NOT synchronized (existing
-     *                  role bindings on each menu are preserved untouched). Defaults to `true`.
+     * @param applicationCode  target application code
+     * @param menus            the menu entries to sync
+     * @param syncRoles        when `false`, role associations are NOT synchronized
+     *                         (existing role bindings on each menu are preserved
+     *                         untouched). Defaults to `true`.
      */
     async syncApplicationMenus(
         applicationCode: string,
         menus: MenuEntryDTO[],
         syncRoles?: boolean,
     ): Promise<ApiResponse<string>> {
-        const options = syncRoles !== undefined ? { params: { syncRoles } } : undefined;
-        return this.post<string>(`/api/m2m/sync/applications/${applicationCode}/menus`, menus, options);
+        const params = syncRoles !== undefined ? { syncRoles } : undefined;
+        return this.post<string>(
+            `/api/m2m/sync/applications/${applicationCode}/menus`,
+            menus,
+            { params, headers: await this.buildAuthHeaders() }
+        );
     }
 
     /**
-     * Get roles for business codes with optional filters
+     * Get roles for business codes with optional filters.
      */
     async getRolesForBusiness(
         identifiers: string[],
@@ -75,12 +142,12 @@ export class M2MClient extends BaseApiClient {
         return this.post<RoleDTO[]>(
             '/api/m2m/roles',
             identifiers,
-            { params: options }
+            { params: options, headers: await this.buildAuthHeaders() }
         );
     }
 
     /**
-     * Get departments for business codes with optional filters
+     * Get departments for business codes with optional filters.
      */
     async getDepartmentsForBusiness(
         identifiers: string[],
@@ -89,7 +156,29 @@ export class M2MClient extends BaseApiClient {
         return this.post<DepartmentDTO[]>(
             '/api/m2m/departments',
             identifiers,
-            { params: options }
+            { params: options, headers: await this.buildAuthHeaders() }
         );
+    }
+
+    /**
+     * Build the per-call header map: always includes the informational
+     * `X-Machine-Service-ID` (when configured), and either the
+     * client-credentials-derived `Authorization: Bearer <token>` or the
+     * legacy `X-Machine-Auth-Token` static header. Centralised here so
+     * every M2M call shares one auth path.
+     */
+    private async buildAuthHeaders(): Promise<Record<string, string>> {
+        const headers: Record<string, string> = {};
+        if (this.serviceId) {
+            headers[M2MClient.SERVICE_HEADER] = this.serviceId;
+        }
+        if (this.tokenProvider) {
+            const token = await this.tokenProvider.getAccessToken();
+            headers['Authorization'] = `Bearer ${token}`;
+        } else if (this.legacyToken) {
+            // Legacy static-token path — kept for backwards compatibility.
+            headers['X-Machine-Auth-Token'] = this.legacyToken;
+        }
+        return headers;
     }
 }

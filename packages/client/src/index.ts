@@ -13,6 +13,16 @@ export { AuthAuditClient } from './client/auth-audit-client.js';
 export { OAuthClient } from './client/oauth-client.js';
 export { BaseApiClient, ApiClientError } from './client/base-client.js';
 
+// Error handling — IgrpErrorCode catalogue + ProblemDetail shape mirroring
+// the server's RFC-7807 error contract.
+export { IgrpErrorCode } from './errors/error-codes.js';
+export type { ProblemDetail } from './errors/error-codes.js';
+
+// OAuth2 client_credentials token provider — re-exported so applications
+// that need direct token access (e.g. to call non-M2M endpoints with a
+// machine identity) can construct one alongside their M2MClient.
+export { ClientCredentialsTokenProvider } from './auth/client-credentials-token-provider.js';
+
 // Type / enum exports — re-export everything declared in types/index.ts so
 // new DTOs, request shapes and enums are automatically available to
 // consumers without touching this barrel.
