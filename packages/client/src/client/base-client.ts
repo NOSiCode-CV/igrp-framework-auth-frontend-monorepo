@@ -2,6 +2,7 @@ import {ApiClientConfig, ApiResponse, UploadFileOptions, UserFilters,
     M2MDepartmentQueryOptions, M2MRoleQueryOptions, M2MUserQueryOptions,
     SyncApplicationMenusOptions
 } from '@/types';
+import type { ProblemDetail, IgrpErrorCode } from '../errors/error-codes.js';
 
 export class BaseApiClient {
     protected baseUrl: string;
@@ -238,11 +239,20 @@ export class BaseApiClient {
 
     private async handleErrorResponse(response: Response): Promise<never> {
         let errorDetails: any;
+        let problemDetail: ProblemDetail | undefined;
 
         try {
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                errorDetails = await response.json();
+            const contentType = response.headers.get('content-type') ?? '';
+            // The Access Management API returns RFC-7807 `application/problem+json`
+            // on every error (introduced by server commit 31c471ac). Older
+            // surfaces still return `application/json` for some error responses
+            // — parse both as ProblemDetail.
+            if (contentType.includes('json')) {
+                const body = await response.json();
+                errorDetails = body;
+                if (body && typeof body === 'object') {
+                    problemDetail = body as ProblemDetail;
+                }
             } else {
                 errorDetails = await response.text();
             }
@@ -250,10 +260,18 @@ export class BaseApiClient {
             errorDetails = null;
         }
 
+        // Prefer the server's formatted ProblemDetail.title in the thrown
+        // message — it's the human-readable, localised text. Fall back to the
+        // generic "HTTP Error: …" wording when no title was returned.
+        const message = problemDetail?.title
+            ? `${problemDetail.title} [${problemDetail.code ?? response.status}]`
+            : `HTTP Error: ${response.status} ${response.statusText}`;
+
         throw new ApiClientError({
-            message: `HTTP Error: ${response.status} ${response.statusText}`,
+            message,
             status: response.status,
-            details: errorDetails
+            details: errorDetails,
+            problemDetail
         });
     }
 
@@ -320,16 +338,54 @@ export class BaseApiClient {
 }
 
 export class ApiClientError extends Error {
+    /** HTTP status code returned by the API. */
     public status: number;
+    /** Raw response body (parsed JSON when content-type was JSON, plain text otherwise). */
     public details?: any;
+    /**
+     * The parsed RFC-7807 ProblemDetail body when the server returned one
+     * (every error response from the Access Management API since server
+     * commit 31c471ac). `undefined` for non-JSON / non-RFC-7807 errors.
+     */
+    public problemDetail?: ProblemDetail;
+    /**
+     * The IGRP error code from `problemDetail.code` — match against
+     * the `IgrpErrorCode` constants (re-exported from `./errors/error-codes`).
+     * `undefined` for responses that didn't carry one.
+     */
+    public errorCode?: IgrpErrorCode | string;
+    /**
+     * The formatted human-readable message from `problemDetail.title`.
+     * `undefined` for responses that didn't carry one.
+     */
+    public title?: string;
+    /** Endpoint-specific extension context from `problemDetail.details`. */
+    public errorDetails?: unknown;
 
-    constructor(params: { message: string; status: number; details?: any }) {
+    constructor(params: {
+        message: string;
+        status: number;
+        details?: any;
+        problemDetail?: ProblemDetail;
+    }) {
         super(params.message);
         this.name = 'ApiClientError';
         this.status = params.status;
         this.details = params.details;
+        this.problemDetail = params.problemDetail;
+        this.errorCode = params.problemDetail?.code;
+        this.title = params.problemDetail?.title;
+        this.errorDetails = params.problemDetail?.details;
 
         // Required to fix prototype chain issues when extending built-ins
         Object.setPrototypeOf(this, ApiClientError.prototype);
+    }
+
+    /**
+     * Convenience matcher: returns `true` when this error was raised with the
+     * given IGRP error code.
+     */
+    is(code: IgrpErrorCode | string): boolean {
+        return this.errorCode === code;
     }
 }
