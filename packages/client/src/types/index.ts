@@ -305,7 +305,6 @@ export interface InviteUserDTO {
 }
 
 export interface UserInvitationResponseDTO {
-    email: string;
     accept: boolean;
     observation?: string;
 }
@@ -317,7 +316,15 @@ export interface CodeDescriptionDTO {
 
 export interface InvitationDTO {
     id: number,
-    email: string;
+    /**
+     * Phase G2 / multi-identifier — the API surfaces the invited principal
+     * as a (type, value) pair so the same invitation flow handles EMAIL,
+     * PHONE and CNI identifiers uniformly. The previous `email` field was
+     * removed; consumers that displayed the email now branch on
+     * `identifierType === 'EMAIL'`.
+     */
+    identifierType: string,
+    identifierValue: string,
     status: InvitationStatus,
     expiry?: string,
     invitationDate: string,
