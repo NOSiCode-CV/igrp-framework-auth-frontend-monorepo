@@ -53,6 +53,22 @@ export enum InvitationStatus {
     CANCELED = 'CANCELED'
 }
 
+/**
+ * Type of identifier an invitation / audit row carries for the invited /
+ * acting principal. Mirrors the server enum
+ * `cv.igrp.platform.access_management.shared.application.constants.IdentifierType`.
+ *
+ * Wire format is the enum name (e.g. `"EMAIL"`). New server-side values
+ * surface in the JSON as a string outside this union — narrow accordingly
+ * before reaching for `IdentifierType.X` access.
+ */
+export enum IdentifierType {
+    CNI = 'CNI',
+    PHONE = 'PHONE',
+    EMAIL = 'EMAIL',
+    UNKNOWN = 'UNKNOWN'
+}
+
 export type MenuTargetType = '_self' | '_blank'
 
 // Resource Types
@@ -323,7 +339,7 @@ export interface InvitationDTO {
      * removed; consumers that displayed the email now branch on
      * `identifierType === 'EMAIL'`.
      */
-    identifierType: string,
+    identifierType: IdentifierType,
     identifierValue: string,
     status: InvitationStatus,
     expiry?: string,
