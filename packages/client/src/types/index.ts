@@ -296,6 +296,25 @@ export interface IGRPUserDTO {
     status: Status;
     picture?: string;
     signature?: string;
+    /** Optional. Maximum 13 characters when supplied; null / omitted is allowed. */
+    nic?: string | null;
+    /**
+     * Optional. Must follow E.164 format (e.g. `+1234567890`) when supplied.
+     * Send `null` (or omit the field) to indicate "no phone" — an empty string
+     * `""` will fail server-side `@Pattern` validation.
+     */
+    phoneNumber?: string | null;
+    /**
+     * Mirrors `t_user.email_verified`. True once the user's email has passed
+     * the OTP / invitation-acceptance verification flow.
+     */
+    emailVerified?: boolean;
+    /**
+     * Free-form metadata mirrored from `t_user.metadata` (jsonb). Exposed
+     * through OAuth user-management APIs and enriched into issued JWTs by
+     * the authorization server.
+     */
+    metadata?: Record<string, unknown>;
 }
 
 export type CreateUserRequest = Omit<IGRPUserDTO, 'id' | 'username'>
