@@ -11,6 +11,7 @@ export { SessionClient } from './client/session-client.js';
 export { AdminSessionClient } from './client/admin-session-client.js';
 export { AuthAuditClient } from './client/auth-audit-client.js';
 export { OAuthClient } from './client/oauth-client.js';
+export { ServiceAccountClient } from './client/service-account-client.js';
 export { BaseApiClient, ApiClientError } from './client/base-client.js';
 
 // Error handling — IgrpErrorCode catalogue + ProblemDetail shape mirroring

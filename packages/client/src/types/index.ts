@@ -658,6 +658,57 @@ export interface OAuthClientRequestDTO {
 }
 
 // =============================================================================
+// OAuth2 Authorization Server — service-account management
+// =============================================================================
+
+/**
+ * A service account is a 1:1 owner of an OAuth2 client used for machine-to-
+ * machine access. It carries its own roles and (optionally) direct permission
+ * grants; the effective permission set at token-issue time is the union of
+ * both. Secrets are never surfaced on the service-account endpoints — they
+ * live on the linked {@link OAuthClientDTO} and are only visible on that
+ * client's creation response.
+ */
+export interface ServiceAccountDTO {
+    id: string;
+    name: string;
+    description?: string;
+    active: boolean;
+    /** UUID of the linked OAuth2 client (1:1). */
+    oauthClientId: string;
+    /** Denormalised for convenience — same as `oauthClient.clientId`. */
+    clientId: string;
+    applicationId?: number;
+    applicationCode?: string;
+    roleIds?: number[];
+    /** Denormalised role codes matching `roleIds`. */
+    roleCodes?: string[];
+    /** Permissions granted DIRECTLY on the service account (bypass role layer). */
+    permissionIds?: number[];
+    /** Denormalised permission names matching `permissionIds`. */
+    permissionNames?: string[];
+    createdAt?: string;
+    updatedAt?: string;
+}
+
+export interface ServiceAccountRequestDTO {
+    name: string;
+    description?: string;
+    active?: boolean;
+    /**
+     * REQUIRED — the OAuth2 client to link. Create the client first via
+     * {@code OAuthClient.createOAuthClient} (grantTypes must include
+     * `client_credentials`); its `id` goes here.
+     */
+    oauthClientId: string;
+    applicationId?: number;
+    /** Full replacement set — omitted role ids are removed. */
+    roleIds?: number[];
+    /** Full replacement set — omitted permission ids are removed. */
+    permissionIds?: number[];
+}
+
+// =============================================================================
 // User metadata (free-form JSONB on t_user, surfaced via OAuth identity APIs)
 // =============================================================================
 

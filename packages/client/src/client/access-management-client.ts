@@ -10,6 +10,8 @@ import {M2MClient} from "./m2m-client";
 import { SessionClient } from "./session-client.js";
 import { AdminSessionClient } from "./admin-session-client.js";
 import { AuthAuditClient } from "./auth-audit-client.js";
+import { OAuthClient } from "./oauth-client.js";
+import { ServiceAccountClient } from "./service-account-client.js";
 
 /**
  * Main Access Management API Client
@@ -27,6 +29,8 @@ export class AccessManagementClient {
     public readonly sessions: SessionClient;
     public readonly adminSessions: AdminSessionClient;
     public readonly authAudit: AuthAuditClient;
+    public readonly oauthClients: OAuthClient;
+    public readonly serviceAccounts: ServiceAccountClient;
 
     constructor(config: ApiClientConfig, m2mConfig?: M2MClientConfig) {
         this.applications = new ApplicationClient(config);
@@ -43,6 +47,8 @@ export class AccessManagementClient {
         this.sessions = new SessionClient(config);
         this.adminSessions = new AdminSessionClient(config);
         this.authAudit = new AuthAuditClient(config);
+        this.oauthClients = new OAuthClient(config);
+        this.serviceAccounts = new ServiceAccountClient(config);
     }
 
     /**
