@@ -10,6 +10,7 @@ import {M2MClient} from "./m2m-client";
 import { SessionClient } from "./session-client.js";
 import { AdminSessionClient } from "./admin-session-client.js";
 import { AuthAuditClient } from "./auth-audit-client.js";
+import { AuditReportsClient } from "./audit-reports-client.js";
 import { OAuthClient } from "./oauth-client.js";
 import { ServiceAccountClient } from "./service-account-client.js";
 
@@ -29,6 +30,7 @@ export class AccessManagementClient {
     public readonly sessions: SessionClient;
     public readonly adminSessions: AdminSessionClient;
     public readonly authAudit: AuthAuditClient;
+    public readonly auditReports: AuditReportsClient;
     public readonly oauthClients: OAuthClient;
     public readonly serviceAccounts: ServiceAccountClient;
 
@@ -47,6 +49,7 @@ export class AccessManagementClient {
         this.sessions = new SessionClient(config);
         this.adminSessions = new AdminSessionClient(config);
         this.authAudit = new AuthAuditClient(config);
+        this.auditReports = new AuditReportsClient(config);
         this.oauthClients = new OAuthClient(config);
         this.serviceAccounts = new ServiceAccountClient(config);
     }

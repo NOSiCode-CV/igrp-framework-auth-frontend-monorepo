@@ -82,6 +82,51 @@ export class BaseApiClient {
         return this.request<T>(this.appendQueryString(endpoint, params), {method: 'GET'});
     }
 
+    /**
+     * Download a binary payload (e.g. the PDF/XLSX report exports) as a
+     * {@link Blob}. Unlike {@link get}, this bypasses JSON parsing and sends
+     * `Accept: * / *` so the server negotiates the binary content type. On a
+     * non-2xx response the shared {@link handleErrorResponse} path runs, so
+     * callers get the same {@link ApiClientError} shape as JSON endpoints.
+     */
+    protected async getBlob(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<Blob>> {
+        const url = `${this.baseUrl}${this.appendQueryString(endpoint, params)}`;
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+        // Reuse configured auth/custom headers, but accept any content type and
+        // never advertise a JSON body.
+        const headers: Record<string, string> = Object.fromEntries(
+            Object.entries(this.defaultHeaders).filter(
+                ([key]) => key.toLowerCase() !== 'content-type' && key.toLowerCase() !== 'accept'
+            )
+        );
+        headers['Accept'] = '*/*';
+
+        try {
+            const response = await fetch(url, {method: 'GET', headers, signal: controller.signal});
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                await this.handleErrorResponse(response);
+            }
+
+            const data = await response.blob();
+            return {data, status: response.status, statusText: response.statusText};
+        } catch (error) {
+            clearTimeout(timeoutId);
+            if (error instanceof ApiClientError) {
+                throw error;
+            }
+            throw new ApiClientError({
+                message: error instanceof Error ? error.message : 'Unknown error occurred',
+                status: 0,
+                details: error
+            });
+        }
+    }
+
     protected async post<T>(
         endpoint: string,
         body?: any,

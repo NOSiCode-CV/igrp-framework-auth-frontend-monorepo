@@ -1,30 +1,42 @@
 import { BaseApiClient } from './base-client.js';
 import {
     ApiResponse,
-    SecurityAuditLogDTO,
+    AuditLogDTO,
     AuditLogFilters,
+    AuditChainValidationResult,
+    AuditPurgeResult,
     PageResponse
 } from '@/types';
 
+/**
+ * Client for the unified, tamper-evident audit log (`/api/auth/audit`).
+ *
+ * Replaces the legacy three-endpoint shape: the former `/`, `/{id}` and
+ * `/user/{userId}` GETs collapsed into a single filtered, paginated
+ * {@link listAuditLogs}. Tamper-evidence controls were added — {@link validate}
+ * verifies the hash chain on demand and {@link purge} clears the trail (gated
+ * separately server-side by `igrp.audit.purge`).
+ */
 export class AuthAuditClient extends BaseApiClient {
     /**
-     * List all audit logs with pagination
+     * Paginated, filtered view of the unified audit log.
      */
-    async listAuditLogs(filters?: AuditLogFilters): Promise<ApiResponse<PageResponse<SecurityAuditLogDTO>>> {
-        return this.get<PageResponse<SecurityAuditLogDTO>>('/api/auth/audit', filters);
+    async listAuditLogs(filters?: AuditLogFilters): Promise<ApiResponse<PageResponse<AuditLogDTO>>> {
+        return this.get<PageResponse<AuditLogDTO>>('/api/auth/audit', filters);
     }
 
     /**
-     * Get a specific audit log entry by ID
+     * Verify the tamper-evident hash chain on demand.
      */
-    async getAuditLogById(id: number): Promise<ApiResponse<SecurityAuditLogDTO>> {
-        return this.get<SecurityAuditLogDTO>(`/api/auth/audit/${id}`);
+    async validate(): Promise<ApiResponse<AuditChainValidationResult>> {
+        return this.post<AuditChainValidationResult>('/api/auth/audit/validate', undefined, { params: undefined });
     }
 
     /**
-     * Get audit logs for a specific user
+     * Purge every audit row except the GENESIS anchor and restart the chain.
+     * Gated by `igrp.audit.purge`.
      */
-    async getAuditLogsByUserId(userId: string, filters?: AuditLogFilters): Promise<ApiResponse<PageResponse<SecurityAuditLogDTO>>> {
-        return this.get<PageResponse<SecurityAuditLogDTO>>(`/api/auth/audit/user/${userId}`, filters);
+    async purge(): Promise<ApiResponse<AuditPurgeResult>> {
+        return this.delete<AuditPurgeResult>('/api/auth/audit/purge', undefined, { params: undefined });
     }
 }

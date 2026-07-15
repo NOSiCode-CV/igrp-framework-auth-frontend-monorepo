@@ -585,9 +585,23 @@ export interface PageResponse<T> {
     empty: boolean;
 }
 
-// Security Audit Types
-export interface SecurityAuditLogDTO {
-    id: number;
+// =============================================================================
+// Unified audit log (tamper-evident) — GET /api/auth/audit
+// =============================================================================
+
+/**
+ * One entry of the unified, tamper-evident audit log.
+ *
+ * Renamed from `SecurityAuditLogDTO` in the Unified Audit & Reports feature: the
+ * primary key is now a UUID string and the row carries the hash-chain fields
+ * (`sequenceNumber`, `previousHash`, `currentHash`). Mirrors the server DTO
+ * `SecurityAuditLogDTO`.
+ */
+export interface AuditLogDTO {
+    id: string;
+    sequenceNumber?: number;
+    previousHash?: string;
+    currentHash?: string;
     userId?: string;
     username?: string;
     sessionId?: string;
@@ -598,14 +612,172 @@ export interface SecurityAuditLogDTO {
     decisionReason?: string;
     eventType?: string;
     category?: string;
+    /** @deprecated legacy free-form JSON blob; new rows write typed columns instead. */
     contextData?: string;
     timestamp?: string;
 }
 
+/**
+ * Filters for the unified audit-log list (GET /api/auth/audit). All optional.
+ * `startDate` / `endDate` are ISO-8601 local date-times; `sort` follows Spring's
+ * `field,direction` convention.
+ */
 export interface AuditLogFilters {
+    userId?: string;
+    username?: string;
+    eventType?: string;
+    category?: string;
+    ipAddress?: string;
+    startDate?: string;
+    endDate?: string;
     page?: number;
     size?: number;
     sort?: string;
+}
+
+/** Result of POST /api/auth/audit/validate — on-demand hash-chain check. */
+export interface AuditChainValidationResult {
+    valid: boolean;
+    rows_checked: number;
+    /** null when the chain is intact; otherwise the sequence number of the first broken row. */
+    broken_at: number | null;
+}
+
+/** Result of DELETE /api/auth/audit/purge. */
+export interface AuditPurgeResult {
+    purged: number;
+}
+
+// =============================================================================
+// Audit reporting — GET /api/auth/reports/{audit,access,settings}
+// =============================================================================
+
+/** Outcome of an audited operation. Mirrors the server enum `AuditStatus`. */
+export enum AuditStatus {
+    SUCCESS = 'SUCCESS',
+    ACCESS_DENIED = 'ACCESS_DENIED',
+    UNUSUAL_IP = 'UNUSUAL_IP',
+    PENDING = 'PENDING',
+    ERROR = 'ERROR'
+}
+
+/** Administrative area of a settings event. Mirrors the server enum `SettingsArea`. */
+export enum SettingsArea {
+    APPLICATIONS = 'APPLICATIONS',
+    USERS = 'USERS',
+    ACCESS = 'ACCESS'
+}
+
+/** Entity type a settings event targets. Mirrors the server enum `SettingsEntityType`. */
+export enum SettingsEntityType {
+    APPLICATION = 'APPLICATION',
+    USER = 'USER',
+    DEPARTMENT = 'DEPARTMENT',
+    ROLE = 'ROLE',
+    PERMISSION = 'PERMISSION',
+    MENU = 'MENU'
+}
+
+/** Operation performed by a settings event. Mirrors the server enum `SettingsOperation`. */
+export enum SettingsOperation {
+    CREATE = 'CREATE',
+    DELETE = 'DELETE',
+    EDIT = 'EDIT',
+    ACTIVATE = 'ACTIVATE',
+    DEACTIVATE = 'DEACTIVATE',
+    INVITE = 'INVITE',
+    CANCEL_INVITE = 'CANCEL_INVITE',
+    RESEND_INVITE = 'RESEND_INVITE',
+    ASSOCIATE = 'ASSOCIATE',
+    DISASSOCIATE = 'DISASSOCIATE',
+    ASSIGN = 'ASSIGN',
+    UNASSIGN = 'UNASSIGN'
+}
+
+/** One row of the Audit Report. Mirrors the server DTO `AuditReportRowDTO`. */
+export interface AuditReportRowDTO {
+    id: string;
+    startDate?: string;
+    endDate?: string;
+    username?: string;
+    module?: string;
+    accessRole?: string;
+    operationState?: string;
+    ipAddress?: string;
+    /** Derived server-side from the user-agent (e.g. "Chrome/Windows"). */
+    device?: string;
+    authorizedBy?: string;
+    status?: AuditStatus;
+}
+
+/** One row of the Access Report. Mirrors the server DTO `AccessReportRowDTO`. */
+export interface AccessReportRowDTO {
+    timestamp?: string;
+    username?: string;
+    role?: string;
+    module?: string;
+    action?: string;
+    ipAddress?: string;
+    status?: AuditStatus;
+}
+
+/** One row of the Settings Report. Mirrors the server DTO `SettingsReportRowDTO`. */
+export interface SettingsReportRowDTO {
+    timestamp?: string;
+    performedBy?: string;
+    area?: SettingsArea;
+    entityType?: SettingsEntityType;
+    operation?: SettingsOperation;
+    entityName?: string;
+    relatedEntity?: string | null;
+    previousValue?: string | null;
+    newValue?: string | null;
+    ipAddress?: string;
+    status?: AuditStatus;
+}
+
+/** Pagination + sort shared by the JSON report endpoints. */
+export interface ReportPageOptions {
+    page?: number;
+    size?: number;
+    sort?: string;
+}
+
+/**
+ * Filters for the Audit Report. `startDate` / `endDate` are REQUIRED (ISO-8601);
+ * a missing bound yields a 400.
+ */
+export interface AuditReportFilters extends ReportPageOptions {
+    startDate: string;
+    endDate: string;
+    username?: string;
+    module?: string;
+    accessRole?: string;
+    operationState?: string;
+    authorizedBy?: string;
+    status?: AuditStatus | string;
+}
+
+/** Filters for the Access Report. `startDate` / `endDate` required. */
+export interface AccessReportFilters extends ReportPageOptions {
+    startDate: string;
+    endDate: string;
+    username?: string;
+    role?: string;
+    module?: string;
+    action?: string;
+    status?: AuditStatus | string;
+}
+
+/** Filters for the Settings Report. `startDate` / `endDate` required. */
+export interface SettingsReportFilters extends ReportPageOptions {
+    startDate: string;
+    endDate: string;
+    performedBy?: string;
+    area?: SettingsArea | string;
+    entityType?: SettingsEntityType | string;
+    operation?: SettingsOperation | string;
+    entityName?: string;
 }
 
 // =============================================================================
