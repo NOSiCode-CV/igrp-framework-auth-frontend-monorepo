@@ -3,9 +3,12 @@ import {
     AccessReportFilters,
     AccessReportRowDTO,
     ApiResponse,
+    AuditReportFileDTO,
+    AuditReportFileFilters,
     AuditReportFilters,
     AuditReportRowDTO,
     PageResponse,
+    ReportFormat,
     SettingsReportFilters,
     SettingsReportRowDTO
 } from '@/types';
@@ -14,11 +17,20 @@ import {
  * Client for the reporting surface over the unified audit log
  * (`/api/auth/reports`).
  *
- * Exposes the three paginated JSON reports (Audit / Access / Settings) plus
- * their PDF and Excel export variants. All endpoints are gated server-side by
- * the single `igrp.audit.view` permission. `startDate` / `endDate` are required
- * on every call; a missing bound yields a 400. Export methods take the same
- * filters as their JSON siblings, minus pagination, and resolve to a `Blob`.
+ * Exposes the three paginated JSON reports (Audit / Access / Settings), their
+ * PDF, Excel and CSV export variants, and the report archive. All endpoints are
+ * gated server-side by the single `igrp.audit.view` permission. `startDate` /
+ * `endDate` are required on every call; a missing bound yields a 400. Export
+ * methods take the same filters as their JSON siblings, minus pagination, and
+ * resolve to a `Blob`.
+ *
+ * Two ways to get a document:
+ *
+ * - **Download** (`get*Xlsx` / `get*Pdf` / `get*Csv`) — resolves to the bytes.
+ * - **Archive** (`archive*`) — the server stores the document and returns an
+ *   {@link AuditReportFileDTO}. Take its `filePath` and resolve it through the
+ *   files client for a short-lived presigned link; the archive call downloads
+ *   nothing itself.
  */
 export class AuditReportsClient extends BaseApiClient {
 
@@ -69,6 +81,65 @@ export class AuditReportsClient extends BaseApiClient {
     /** Settings Report as PDF — `GET /api/auth/reports/settings.pdf`. */
     async getSettingsReportPdf(filters: SettingsReportFilters): Promise<ApiResponse<Blob>> {
         return this.getBlob('/api/auth/reports/settings.pdf', stripPaging(filters));
+    }
+
+    /** Audit Report as CSV — `GET /api/auth/reports/audit.csv`. */
+    async getAuditReportCsv(filters: AuditReportFilters): Promise<ApiResponse<Blob>> {
+        return this.getBlob('/api/auth/reports/audit.csv', stripPaging(filters));
+    }
+
+    /** Access Report as CSV — `GET /api/auth/reports/access.csv`. */
+    async getAccessReportCsv(filters: AccessReportFilters): Promise<ApiResponse<Blob>> {
+        return this.getBlob('/api/auth/reports/access.csv', stripPaging(filters));
+    }
+
+    /** Settings Report as CSV — `GET /api/auth/reports/settings.csv`. */
+    async getSettingsReportCsv(filters: SettingsReportFilters): Promise<ApiResponse<Blob>> {
+        return this.getBlob('/api/auth/reports/settings.csv', stripPaging(filters));
+    }
+
+    // --------------------------------------------------------------- Archive
+
+    /**
+     * Archive the Audit Report — `POST /api/auth/reports/audit/archive`.
+     * The server generates the document in `format`, stores it, and returns the
+     * record. Resolve `filePath` through the files client to download it.
+     */
+    async archiveAuditReport(
+        format: ReportFormat | string,
+        filters: AuditReportFilters
+    ): Promise<ApiResponse<AuditReportFileDTO>> {
+        return this.post<AuditReportFileDTO>('/api/auth/reports/audit/archive', undefined, {
+            params: {...stripPaging(filters), format}
+        });
+    }
+
+    /** Archive the Access Report — `POST /api/auth/reports/access/archive`. */
+    async archiveAccessReport(
+        format: ReportFormat | string,
+        filters: AccessReportFilters
+    ): Promise<ApiResponse<AuditReportFileDTO>> {
+        return this.post<AuditReportFileDTO>('/api/auth/reports/access/archive', undefined, {
+            params: {...stripPaging(filters), format}
+        });
+    }
+
+    /** Archive the Settings Report — `POST /api/auth/reports/settings/archive`. */
+    async archiveSettingsReport(
+        format: ReportFormat | string,
+        filters: SettingsReportFilters
+    ): Promise<ApiResponse<AuditReportFileDTO>> {
+        return this.post<AuditReportFileDTO>('/api/auth/reports/settings/archive', undefined, {
+            params: {...stripPaging(filters), format}
+        });
+    }
+
+    /**
+     * List archived report exports, newest first —
+     * `GET /api/auth/reports/archives`. All filters are optional.
+     */
+    async listArchives(filters?: AuditReportFileFilters): Promise<ApiResponse<PageResponse<AuditReportFileDTO>>> {
+        return this.get<PageResponse<AuditReportFileDTO>>('/api/auth/reports/archives', filters);
     }
 }
 

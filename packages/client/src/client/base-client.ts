@@ -1,6 +1,7 @@
 import {ApiClientConfig, ApiResponse, UploadFileOptions, UserFilters,
     M2MDepartmentQueryOptions, M2MRoleQueryOptions, M2MUserQueryOptions,
-    SyncApplicationMenusOptions
+    SyncApplicationMenusOptions,
+    ArchiveAuditReportParams, ArchiveAccessReportParams, ArchiveSettingsReportParams
 } from '@/types';
 import type { ProblemDetail, IgrpErrorCode } from '../errors/error-codes.js';
 
@@ -130,7 +131,7 @@ export class BaseApiClient {
     protected async post<T>(
         endpoint: string,
         body?: any,
-        params?: { params: UserFilters | UploadFileOptions | M2MDepartmentQueryOptions | M2MRoleQueryOptions | M2MUserQueryOptions | SyncApplicationMenusOptions | undefined,
+        params?: { params: UserFilters | UploadFileOptions | M2MDepartmentQueryOptions | M2MRoleQueryOptions | M2MUserQueryOptions | SyncApplicationMenusOptions | ArchiveAuditReportParams | ArchiveAccessReportParams | ArchiveSettingsReportParams | undefined,
             headers?: Record<string, string> }
     ): Promise<ApiResponse<T>> {
         // Build query string from params.params, not the whole params object

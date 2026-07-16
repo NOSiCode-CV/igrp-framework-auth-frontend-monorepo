@@ -781,6 +781,71 @@ export interface SettingsReportFilters extends ReportPageOptions {
 }
 
 // =============================================================================
+// Report archive
+// =============================================================================
+
+/** Which of the three reports an archived export came from. Mirrors the server enum `ReportType`. */
+export enum ReportType {
+    AUDIT = 'AUDIT',
+    ACCESS = 'ACCESS',
+    SETTINGS = 'SETTINGS'
+}
+
+/** Export format of a report. Mirrors the server enum `ReportFormat`. */
+export enum ReportFormat {
+    PDF = 'PDF',
+    XLSX = 'XLSX',
+    CSV = 'CSV'
+}
+
+/**
+ * An archived report export.
+ *
+ * `filePath` is the retrieval handle — no download URL is carried here, because
+ * presigned links expire (server default 300s). To open an archived report,
+ * pass the path to the files client:
+ *
+ * ```ts
+ * const {data: archived} = await client.auditReports.archiveAuditReport(ReportFormat.XLSX, filters);
+ * const {data: link} = await client.files.getFileUrl(archived.filePath);
+ * window.open(link.url);
+ * ```
+ */
+export interface AuditReportFileDTO {
+    id: string;
+    reportType?: ReportType;
+    format?: ReportFormat;
+    /** Storage key, e.g. `private/audit-reports/<user>/<uuid>_audit-report-2026-07-16.xlsx`. */
+    filePath: string;
+    fileName?: string;
+    contentType?: string;
+    sizeBytes?: number;
+    /** Data rows in the document, excluding the header. */
+    rowCount?: number;
+    /** JSON snapshot of the filters the report was generated with. */
+    filters?: string;
+    periodStart?: string;
+    periodEnd?: string;
+    generatedBy?: string;
+    generatedAt?: string;
+}
+
+/**
+ * Filters for listing archived exports (`GET /api/auth/reports/archives`).
+ * All optional — unlike the reports, there are no required date bounds.
+ */
+export interface AuditReportFileFilters extends ReportPageOptions {
+    reportType?: ReportType | string;
+    format?: ReportFormat | string;
+    generatedBy?: string;
+}
+
+/** Query for an archive request: the report's own filters plus the required `format`. */
+export type ArchiveAuditReportParams = AuditReportFilters & { format: ReportFormat | string };
+export type ArchiveAccessReportParams = AccessReportFilters & { format: ReportFormat | string };
+export type ArchiveSettingsReportParams = SettingsReportFilters & { format: ReportFormat | string };
+
+// =============================================================================
 // OAuth2 Authorization Server — client management
 // =============================================================================
 
