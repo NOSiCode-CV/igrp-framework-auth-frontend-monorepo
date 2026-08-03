@@ -867,6 +867,12 @@ export interface OAuthClientDTO {
     clientName?: string;
     description?: string;
     active: boolean;
+    /**
+     * OWASP A01 — PKCE is required by default on every authorization_code flow
+     * (server default: true). Set to false only for legacy confidential clients
+     * that cannot send `code_challenge`.
+     */
+    requirePkce?: boolean;
     /** Owning application id (1 application → N clients). */
     applicationId?: number;
     applicationCode?: string;
@@ -875,6 +881,12 @@ export interface OAuthClientDTO {
     authorizationCodeTtl: number;
     scopes: string[];
     redirectUris: string[];
+    /**
+     * Whitelist of URIs the AM's RP-initiated-logout endpoint is allowed to
+     * redirect to via `post_logout_redirect_uri`. Byte-for-byte match per the
+     * OIDC spec. Only meaningful for clients that use `authorization_code`.
+     */
+    postLogoutRedirectUris?: string[];
     grantTypes: OAuthGrantType[] | string[];
     createdAt?: string;
     updatedAt?: string;
@@ -885,12 +897,20 @@ export interface OAuthClientRequestDTO {
     clientName: string;
     description?: string;
     active?: boolean;
+    /**
+     * OWASP A01 — PKCE is required by default on every authorization_code flow.
+     * Omit to keep the server default (true) on create; omit on partial PUT to
+     * leave the existing value unchanged.
+     */
+    requirePkce?: boolean;
     applicationId?: number;
     accessTokenTtl?: number;
     refreshTokenTtl?: number;
     authorizationCodeTtl?: number;
     scopes: string[];
     redirectUris?: string[];
+    /** See `OAuthClientDTO.postLogoutRedirectUris`. */
+    postLogoutRedirectUris?: string[];
     grantTypes: OAuthGrantType[] | string[];
 }
 
