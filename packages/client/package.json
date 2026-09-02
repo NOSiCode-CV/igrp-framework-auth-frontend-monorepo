@@ -1,6 +1,6 @@
 {
   "name": "@igrp/platform-access-management-client-ts",
-  "version": "0.2.0-beta.15",
+  "version": "0.2.0-beta.16",
   "license": "MIT",
   "type": "module",
   "main": "./dist/index.umd.cjs",

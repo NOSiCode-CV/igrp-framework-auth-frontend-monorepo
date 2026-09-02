@@ -246,11 +246,24 @@ export class DepartmentClient extends BaseApiClient {
     }
 
     /**
-     * Get department's permissions with optional filter
+     * Get department's permissions with optional filters
+     *
+     * @param departmentCode   the department code
+     * @param permissionName   optional — restrict to permissions whose name matches (server-side ILIKE %name%)
+     * @param resourceName     optional — restrict to permissions attached to the resource with this name
      */
-    async getDepartmentPermissionsFiltered(departmentCode: string, permissionName?: string): Promise<ApiResponse<PermissionDTO[]>> {
-        const params = permissionName ? { permissionName } : undefined;
-        return this.get<PermissionDTO[]>(`/api/departments/${departmentCode}/permissions`, params);
+    async getDepartmentPermissionsFiltered(
+        departmentCode: string,
+        permissionName?: string,
+        resourceName?: string
+    ): Promise<ApiResponse<PermissionDTO[]>> {
+        const params: Record<string, string> = {};
+        if (permissionName) params.permissionName = permissionName;
+        if (resourceName) params.resourceName = resourceName;
+        return this.get<PermissionDTO[]>(
+            `/api/departments/${departmentCode}/permissions`,
+            Object.keys(params).length ? params : undefined
+        );
     }
 
     /**

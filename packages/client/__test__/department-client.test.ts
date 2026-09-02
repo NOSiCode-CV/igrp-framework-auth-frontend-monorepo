@@ -253,6 +253,26 @@ describe('DepartmentClient', () => {
             expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/permissions', undefined);
             expect(result).toBe(mockResponse);
         });
+
+        it('should get department permissions with resourceName filter only', async () => {
+            const mockResponse = [{ id: 1, name: 'PERM1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getDepartmentPermissionsFiltered('DEPT1', undefined, 'invoice-service');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/permissions', { resourceName: 'invoice-service' });
+            expect(result).toBe(mockResponse);
+        });
+
+        it('should get department permissions with both permissionName and resourceName filters', async () => {
+            const mockResponse = [{ id: 1, name: 'PERM1' }];
+            mockGet.mockResolvedValue(mockResponse);
+
+            const result = await client.getDepartmentPermissionsFiltered('DEPT1', 'PERM1', 'invoice-service');
+
+            expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/permissions', { permissionName: 'PERM1', resourceName: 'invoice-service' });
+            expect(result).toBe(mockResponse);
+        });
     });
 
     describe('getAvailablePermissionsFiltered', () => {
