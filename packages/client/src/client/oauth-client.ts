@@ -49,6 +49,22 @@ export class OAuthClient extends BaseApiClient {
     }
 
     /**
+     * Rotate an existing client's secret.
+     *
+     * The response carries the NEW raw `clientSecret` — show it to the operator
+     * once and discard it; it is not recoverable afterwards. `id` and
+     * `clientId` are preserved, so only the secret has to be redistributed to
+     * consumers.
+     *
+     * The previous secret stops working immediately. Access tokens already
+     * issued stay valid until they expire — deactivate the client as well if a
+     * leak requires cutting those off too.
+     */
+    async rotateOAuthClientSecret(id: string): Promise<ApiResponse<OAuthClientDTO>> {
+        return this.post<OAuthClientDTO>(`/api/clients/${id}/rotate-secret`);
+    }
+
+    /**
      * Delete an OAuth2 client.
      */
     async deleteOAuthClient(id: string): Promise<ApiResponse<void>> {
