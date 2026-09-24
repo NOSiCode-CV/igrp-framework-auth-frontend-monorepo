@@ -937,15 +937,51 @@ export interface ServiceAccountDTO {
     clientId: string;
     applicationId?: number;
     applicationCode?: string;
+    /**
+     * Roles held, each as an id/code/department triple, ordered by id.
+     * Use this rather than `roleIds` + `roleCodes`.
+     */
+    roles?: ServiceAccountRole[];
+    /**
+     * Permissions granted DIRECTLY on the account (bypassing the role layer),
+     * each as an id/name pair, ordered by id. Use this rather than
+     * `permissionIds` + `permissionNames`.
+     */
+    permissions?: ServiceAccountPermission[];
+    /** @deprecated cannot be paired with `roleCodes` — use `roles`. */
     roleIds?: number[];
-    /** Denormalised role codes matching `roleIds`. */
+    /** @deprecated cannot be paired with `roleIds` — use `roles`. */
     roleCodes?: string[];
-    /** Permissions granted DIRECTLY on the service account (bypass role layer). */
+    /** @deprecated cannot be paired with `permissionNames` — use `permissions`. */
     permissionIds?: number[];
-    /** Denormalised permission names matching `permissionIds`. */
+    /** @deprecated cannot be paired with `permissionIds` — use `permissions`. */
     permissionNames?: string[];
     createdAt?: string;
     updatedAt?: string;
+}
+
+/**
+ * One role held by a service account.
+ *
+ * `departmentCode` is part of the identity, not decoration: role codes are
+ * unique only within a department, so two distinct roles can share a code.
+ */
+export interface ServiceAccountRole {
+    id: number;
+    code: string;
+    /** Null for a role with no department. */
+    departmentCode?: string | null;
+}
+
+/**
+ * One permission granted directly to a service account.
+ *
+ * No department is carried: direct grants are not department-scoped, a service
+ * account may hold any permission in the system.
+ */
+export interface ServiceAccountPermission {
+    id: number;
+    name: string;
 }
 
 export interface ServiceAccountRequestDTO {
