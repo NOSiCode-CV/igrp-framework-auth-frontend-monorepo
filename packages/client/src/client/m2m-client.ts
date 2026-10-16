@@ -14,6 +14,8 @@ import {
     M2MRoleQueryOptions,
     M2MDepartmentQueryOptions,
     MenuEntryDTO,
+    GlobalConfigurationDTO,
+    GlobalConfigurationType,
 } from '@/types';
 
 /**
@@ -143,6 +145,33 @@ export class M2MClient extends BaseApiClient {
             '/api/m2m/roles',
             identifiers,
             { params: options, headers: await this.buildAuthHeaders() }
+        );
+    }
+
+
+    /**
+     * Read a global configuration (branding) with the machine token.
+     *
+     * Returns the most recently modified row for `type`, identical to the
+     * user-scoped `GET /api/global-configuration`.
+     *
+     * Use this wherever there is no signed-in user — login and invitation
+     * pages, or a freshly started app process that has not yet served an
+     * authenticated request. Those render default colours and logos if the
+     * Brand can only be fetched with a session token.
+     *
+     * Read-only: writing a configuration still requires a user token and the
+     * `igrp.applications.customize` permission.
+     *
+     * @throws 400 when `type` is not a known configuration type
+     * @throws 404 when nothing has been saved for that type
+     */
+    async getGlobalConfiguration(
+        type: GlobalConfigurationType | string
+    ): Promise<ApiResponse<GlobalConfigurationDTO>> {
+        return this.get<GlobalConfigurationDTO>(
+            '/api/m2m/global-configuration',
+            { params: { type }, headers: await this.buildAuthHeaders() }
         );
     }
 
