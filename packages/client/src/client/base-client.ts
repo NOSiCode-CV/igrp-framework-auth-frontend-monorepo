@@ -158,9 +158,30 @@ export class BaseApiClient {
 
         return this.request<T>(url, {
             method: 'POST',
-            body: isFormData ? body : (body !== undefined ? JSON.stringify(body) : undefined),
+            body: isFormData ? (body as FormData) : this.serialiseBody(body, headers),
             headers
         });
+    }
+
+    /**
+     * Serialise a request body for the Content-Type actually being sent.
+     *
+     * JSON is the default and is stringified. When a caller overrides
+     * Content-Type — `application/xml`, `text/plain` — a string body is sent
+     * verbatim: JSON.stringify would wrap it in quotes and escape it, so the
+     * server received `"<test>123</test>"` instead of `<test>123</test>`.
+     */
+    private serialiseBody(body: unknown, headers: Record<string, string>): string | FormData | undefined {
+        if (body === undefined) {
+            return undefined;
+        }
+        const contentType = Object.entries(headers)
+            .find(([k]) => k.toLowerCase() === 'content-type')?.[1];
+        const isJson = !contentType || contentType.toLowerCase().includes('application/json');
+        if (!isJson && typeof body === 'string') {
+            return body;
+        }
+        return JSON.stringify(body);
     }
 
     /**
@@ -216,7 +237,7 @@ export class BaseApiClient {
 
         return this.request<T>(url, {
             method: 'PUT',
-            body: isFormData ? body : (body !== undefined ? JSON.stringify(body) : undefined),
+            body: isFormData ? (body as FormData) : this.serialiseBody(body, headers),
             headers
         });
     }
@@ -251,7 +272,7 @@ export class BaseApiClient {
 
         return this.request<T>(url, {
             method: 'DELETE',
-            body: isFormData ? body : (body !== undefined ? JSON.stringify(body) : undefined),
+            body: isFormData ? (body as FormData) : this.serialiseBody(body, headers),
             headers
         });
     }

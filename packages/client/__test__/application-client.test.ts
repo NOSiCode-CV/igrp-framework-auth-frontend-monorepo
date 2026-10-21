@@ -100,14 +100,10 @@ describe('ApplicationClient', () => {
         expect(result).toBe(mockResponse);
     });
 
-    it('should get available menus for application', async () => {
-        const mockResponse = [{ id: 1, name: 'Menu 1' }, { id: 2, name: 'Menu 2' }];
-        mockGet.mockResolvedValue(mockResponse);
 
-        const result = await client.getAvailableMenus('APP1');
-
-        expect(mockGet).toHaveBeenCalledWith('/api/applications/APP1/menus/available');
-        expect(result).toBe(mockResponse);
-    })
-
+    // Removed: 'should get available menus for application'. ApplicationClient has
+    // no getAvailableMenus, and no `/applications/{code}/menus/available` endpoint
+    // exists. The available-menus listing is department-scoped:
+    // `departments/{departmentCode}/applications/{applicationCode}/menus/available`,
+    // covered by DepartmentClient.getAvailableMenus.
 });

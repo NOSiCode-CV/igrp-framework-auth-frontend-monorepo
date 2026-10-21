@@ -37,12 +37,12 @@ describe('UserClient', () => {
 
     it('should get users with filters', async () => {
         const mockResponse: IGRPUserDTO[] = [{ id: USER_ID_1, name: 'John Doe', username: 'johndoe', email: 'john@example.com', status: Status.ACTIVE }];
-        mockPost.mockResolvedValue(mockResponse);
+        mockGet.mockResolvedValue(mockResponse);
 
         const filters = { name: 'John' };
         const result = await client.getUsers(filters);
 
-        expect(mockPost).toHaveBeenCalledWith('/api/users/list', [], { params: filters});
+        expect(mockGet).toHaveBeenCalledWith('/api/users', filters);
         expect(result).toBe(mockResponse);
     });
 

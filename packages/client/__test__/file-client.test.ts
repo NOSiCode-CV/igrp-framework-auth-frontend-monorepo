@@ -72,7 +72,7 @@ describe('FileClient', () => {
             const result = await client.getFileUrl('path/to/file');
 
             expect(mockGet).toHaveBeenCalledWith('/api/files/url', {
-                privateFilePath: 'path/to/file'
+                filePath: 'path/to/file'
             });
             expect(result).toBe(mockResponse);
         });

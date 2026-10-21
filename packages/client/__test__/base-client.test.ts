@@ -27,6 +27,7 @@ describe('BaseApiClient', () => {
         ok: true,
         status: 200,
         statusText: 'OK',
+        text: vi.fn().mockResolvedValue(JSON.stringify({ data: 'test data' })),
         json: vi.fn().mockResolvedValue({ data: 'test data' }),
         headers: {
           get: vi.fn().mockReturnValue('application/json')
@@ -86,6 +87,7 @@ describe('BaseApiClient', () => {
         ok: false,
         status: 404,
         statusText: 'Not Found',
+        text: vi.fn().mockResolvedValue(JSON.stringify(errorDetails)),
         json: vi.fn().mockResolvedValue(errorDetails),
         headers: {
           get: vi.fn().mockReturnValue('application/json')
@@ -131,6 +133,7 @@ describe('BaseApiClient', () => {
         ok: true,
         status: 200,
         statusText: 'OK',
+        text: vi.fn().mockResolvedValue(JSON.stringify({ data: 'test' })),
         json: vi.fn().mockResolvedValue({ data: 'test' }),
         headers: {
           get: vi.fn().mockReturnValue('application/json')
@@ -212,6 +215,7 @@ describe('BaseApiClient', () => {
         ok: true,
         status: 200,
         statusText: 'OK',
+        text: vi.fn().mockResolvedValue(JSON.stringify({ data: 'test' })),
         json: vi.fn().mockResolvedValue({ data: 'test' }),
         headers: { get: vi.fn().mockReturnValue('application/json') },
       };
@@ -239,6 +243,7 @@ describe('BaseApiClient', () => {
         ok: true,
         status: 200,
         statusText: 'OK',
+        text: vi.fn().mockResolvedValue(JSON.stringify({ data: 'test' })),
         json: vi.fn().mockResolvedValue({ data: 'test' }),
         headers: { get: vi.fn().mockReturnValue('application/json') },
       };
@@ -265,6 +270,7 @@ describe('BaseApiClient', () => {
       const mockResponse = {
         ok: true,
         status: 200,
+        text: vi.fn().mockResolvedValue(JSON.stringify({ success: true })),
         json: vi.fn().mockResolvedValue({ success: true }),
         headers: { get: vi.fn().mockReturnValue('application/json') },
       };
@@ -290,6 +296,7 @@ describe('BaseApiClient', () => {
       const mockResponse = {
         ok: true,
         status: 200,
+        text: vi.fn().mockResolvedValue(JSON.stringify({ success: true })),
         json: vi.fn().mockResolvedValue({ success: true }),
         headers: { get: vi.fn().mockReturnValue('application/json') },
       };
@@ -317,6 +324,7 @@ describe('BaseApiClient', () => {
         ok: true,
         status: 200,
         statusText: 'OK',
+        text: vi.fn().mockResolvedValue(JSON.stringify({ data: 'test' })),
         json: vi.fn().mockResolvedValue({ data: 'test' }),
         headers: {
           get: vi.fn().mockReturnValue('application/json')

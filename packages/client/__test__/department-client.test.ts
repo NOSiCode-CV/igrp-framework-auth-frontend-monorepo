@@ -103,9 +103,9 @@ describe('DepartmentClient', () => {
         const mockResponse = [{ id: 1, code: 'MENU_1', departments: ['DEPT1'] }, { id: 2, code: 'MENU_2', departments: ['DEPT1'] }];
         mockGet.mockResolvedValue(mockResponse);
 
-        const result = await client.getAvailableMenus('DEPT1');
+        const result = await client.getAvailableMenus('APP1', 'DEPT1');
 
-        expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/menus/available');
+        expect(mockGet).toHaveBeenCalledWith('/api/departments/DEPT1/applications/APP1/menus/available');
         expect(result).toBe(mockResponse);
     })
 
@@ -125,9 +125,9 @@ describe('DepartmentClient', () => {
         mockPost.mockResolvedValue(mockResponse);
 
         const menuCodes = ["MENU_1", "MENU_2"]
-        const result = await client.addMenusToDepartment("DEPT", menuCodes);
+        const result = await client.addMenusToDepartment("APP", "DEPT", menuCodes);
 
-        expect(mockPost).toHaveBeenCalledWith('/api/departments/DEPT/menus', menuCodes)
+        expect(mockPost).toHaveBeenCalledWith('/api/departments/DEPT/applications/APP/menus', menuCodes)
         expect(result).toBe(mockResponse)
     })
 
@@ -149,9 +149,9 @@ describe('DepartmentClient', () => {
         mockDelete.mockResolvedValue(mockResponse);
 
         const menuCodes = ["MENU_1", "MENU_2"]
-        const result = await client.removeMenusFromDepartment("DEPT", menuCodes);
+        const result = await client.removeMenusFromDepartment("APP", "DEPT", menuCodes);
 
-        expect(mockDelete).toHaveBeenCalledWith('/api/departments/DEPT/menus', menuCodes)
+        expect(mockDelete).toHaveBeenCalledWith('/api/departments/DEPT/applications/APP/menus', menuCodes)
         expect(result).toBe(mockResponse)
     })
 
