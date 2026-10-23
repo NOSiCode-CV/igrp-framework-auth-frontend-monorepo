@@ -74,7 +74,7 @@ One beta release:
 ## Out of Scope
 
 - **`refreshSession()`.** It works and is scoped by `sid` on the server.
-- **An `X-Device-Id` header.** AM no longer closes a session when another app signs in on the same derived device (server commit `0444154d`), so the client has nothing to send.
+- **An `X-Device-Id` header.** AM no longer closes a session when another app signs in on the same derived device (server commits `0444154d` and `6674a9d6`; the first alone makes the second sign-in fail), so the client has nothing to send.
 - **Typing other error bodies.** `ApiClientError.details` already carries AM's 401 body `{"error":"invalid_token","error_description":"session_revoked"}`.
 - **Admin session endpoints** (`AdminSessionClient`).
 
